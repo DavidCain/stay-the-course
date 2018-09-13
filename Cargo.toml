@@ -1,0 +1,10 @@
+[package]
+name = "rusty_cash"
+version = "0.1.0"
+authors = ["David Cain <davidjosephcain@gmail.com>"]
+
+[dependencies]
+quick-xml = "0.13.1"
+decimal = "2.0.4"
+chrono = "0.4.6"
+ord_subset = "3"

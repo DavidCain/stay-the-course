@@ -1,0 +1,38 @@
+extern crate decimal;
+
+use self::decimal::d128;
+
+#[derive(Debug)]
+pub struct Asset {
+    pub asset_class: AssetClass,
+    pub name: String,
+    pub value: d128,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum AssetClass {
+    USBonds,
+    USStocks,
+    InternationalBonds,
+    InternationalStocks,
+    REIT,
+    Target,
+    Cash,
+}
+
+pub fn classify(fund_name: &str) -> AssetClass {
+    match fund_name {
+        "VTSAX" => AssetClass::USStocks,
+        "VFIAX" => AssetClass::USStocks,
+        "FZROX" => AssetClass::USStocks,
+        "FZILX" => AssetClass::InternationalStocks,
+        "VTIAX" => AssetClass::InternationalStocks,
+        "VBTLX" => AssetClass::USBonds,
+        "VGSLX" => AssetClass::REIT,
+        "FZFXX" => AssetClass::Cash,   // Fidelity core position
+        "VMFXX" => AssetClass::Cash,   // Vanguard settlement fund
+        "VFFVX" => AssetClass::Target, // Target 2055
+        "VTTSX" => AssetClass::Target, // Target 2060
+        _ => panic!("Unknown fund name {:?}", fund_name),
+    }
+}
