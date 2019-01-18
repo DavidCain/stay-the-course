@@ -1,11 +1,11 @@
 extern crate chrono;
-extern crate decimal;
 extern crate quick_xml;
+extern crate rust_decimal;
 
 use self::chrono::{DateTime, FixedOffset};
-use self::decimal::d128;
 use self::quick_xml::events::Event;
 use self::quick_xml::Reader;
+use self::rust_decimal::Decimal;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
@@ -24,7 +24,7 @@ trait GnucashFromXML {
 struct Price {
     from_commodity: Commodity,
     to_commodity: Commodity,
-    value: d128,
+    value: Decimal,
     time: DateTime<FixedOffset>,
 }
 
@@ -44,7 +44,7 @@ impl GnucashFromXML for Price {
 
         let mut maybe_from_commodity = None;
         let mut maybe_to_commodity = None;
-        let mut value: d128 = d128!(0);
+        let mut value: Decimal = 0.into();
         let mut found_ts = None;
 
         loop {
@@ -217,8 +217,8 @@ impl Commodity {
 
 #[derive(Debug)]
 struct Split {
-    value: d128,
-    quantity: d128,
+    value: Decimal,
+    quantity: Decimal,
     account: String, // guid
 }
 
@@ -226,8 +226,8 @@ impl Split {
     fn from_xml(reader: &mut Reader<BufReader<File>>) -> Split {
         let mut buf = Vec::new();
 
-        let mut value: d128 = d128!(0);
-        let mut quantity: d128 = d128!(0);
+        let mut value: Decimal = 0.into();
+        let mut quantity: Decimal = 0.into();
         let mut account: String = String::from("");
 
         loop {
@@ -401,16 +401,16 @@ impl Account {
         self.splits.push(split);
     }
 
-    fn current_quantity(&self) -> d128 {
+    fn current_quantity(&self) -> Decimal {
         // std::iter::Sum<d128> isn't implemented. =(
-        let mut total = d128!(0);
+        let mut total = 0.into();
         for split in self.splits.iter() {
             total += split.quantity;
         }
         total
     }
 
-    fn current_value(&self, last_known_price: &Price) -> d128 {
+    fn current_value(&self, last_known_price: &Price) -> Decimal {
         match &self.commodity {
             Some(commodity) => {
                 if commodity.id != last_known_price.from_commodity.id {
@@ -474,11 +474,11 @@ impl Account {
     }
 }
 
-fn to_quantity(fraction: &str) -> d128 {
+fn to_quantity(fraction: &str) -> Decimal {
     let mut components = fraction.split("/");
     let numerator = components.next().unwrap();
     let denomenator = components.next().unwrap();
-    d128::from_str(numerator).unwrap() / d128::from_str(denomenator).unwrap()
+    Decimal::from_str(numerator).unwrap() / Decimal::from_str(denomenator).unwrap()
 }
 
 pub struct Book {
@@ -523,7 +523,7 @@ impl Book {
                 .expect(&format!("No last price found for {:?}", account.commodity));
 
             let value = account.current_value(price);
-            if value == d128!(0) {
+            if value == 0.into() {
                 // We ignore empty accounts
                 continue;
             }

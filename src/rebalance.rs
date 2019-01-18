@@ -1,32 +1,30 @@
-extern crate decimal;
-extern crate ord_subset;
+extern crate rust_decimal;
 
-use self::decimal::d128;
-use self::ord_subset::OrdVar;
+use self::rust_decimal::Decimal;
 use assets::{Asset, AssetClass};
 
 #[derive(Debug)]
 pub struct AssetAllocation {
     pub asset_class: AssetClass,
-    pub target_ratio: d128,
+    pub target_ratio: Decimal,
     underlying_assets: Vec<Asset>,
-    future_contribution: d128,
+    future_contribution: Decimal,
 }
 
 pub fn ideal_allocations() -> Vec<AssetAllocation> {
     // TODO: Calculate based off my age, current date
     vec![
-        AssetAllocation::new(AssetClass::USBonds, d128!(0.082)),
-        AssetAllocation::new(AssetClass::USStocks, d128!(0.459)),
-        AssetAllocation::new(AssetClass::InternationalStocks, d128!(0.367)),
-        AssetAllocation::new(AssetClass::REIT, d128!(0.092)),
+        AssetAllocation::new(AssetClass::USBonds, Decimal::new(82, 3)),
+        AssetAllocation::new(AssetClass::USStocks, Decimal::new(459, 3)),
+        AssetAllocation::new(AssetClass::InternationalStocks, Decimal::new(367, 3)),
+        AssetAllocation::new(AssetClass::REIT, Decimal::new(92, 3)),
     ]
 }
 
 impl AssetAllocation {
-    fn new(asset_class: AssetClass, target_ratio: d128) -> AssetAllocation {
+    fn new(asset_class: AssetClass, target_ratio: Decimal) -> AssetAllocation {
         let underlying_assets = Vec::new();
-        let future_contribution = d128::zero();
+        let future_contribution = 0.into();
 
         AssetAllocation {
             asset_class,
@@ -36,17 +34,17 @@ impl AssetAllocation {
         }
     }
 
-    pub fn add_contribution(&mut self, contribution: d128) {
+    pub fn add_contribution(&mut self, contribution: Decimal) {
         self.future_contribution += contribution;
     }
 
-    fn current_value(&self) -> d128 {
+    fn current_value(&self) -> Decimal {
         self.underlying_assets
             .iter()
-            .fold(d128::zero(), |total, asset| total + asset.value)
+            .fold(0.into(), |total, asset| total + asset.value)
     }
 
-    fn future_value(&self) -> d128 {
+    fn future_value(&self) -> Decimal {
         self.current_value() + self.future_contribution
     }
 
@@ -57,15 +55,15 @@ impl AssetAllocation {
         self.underlying_assets.push(asset)
     }
 
-    fn percent_holdings(&self, portfolio_total: d128) -> d128 {
+    fn percent_holdings(&self, portfolio_total: Decimal) -> Decimal {
         self.future_value() / portfolio_total
     }
 
-    fn deviation(&self, new_total: d128) -> d128 {
+    fn deviation(&self, new_total: Decimal) -> Decimal {
         // Identify the percentage of total holdings that this asset will hold
         // (Assesses current value, pending contributions over the eventual total portfolio value)
         let actual = self.percent_holdings(new_total);
-        (actual / self.target_ratio) - d128!(1)
+        (actual / self.target_ratio) - Decimal::new(1, 0)
     }
 }
 
@@ -78,28 +76,22 @@ impl Portfolio {
         Portfolio { allocations }
     }
 
-    fn current_value(&self) -> d128 {
-        self.allocations
-            .iter()
-            .fold(d128::zero(), |total, allocation| {
-                total + &allocation.current_value()
-            })
+    fn current_value(&self) -> Decimal {
+        self.allocations.iter().fold(0.into(), |total, allocation| {
+            total + &allocation.current_value()
+        })
     }
 
-    fn future_value(&self) -> d128 {
-        self.allocations
-            .iter()
-            .fold(d128::zero(), |total, allocation| {
-                total + &allocation.future_value()
-            })
+    fn future_value(&self) -> Decimal {
+        self.allocations.iter().fold(0.into(), |total, allocation| {
+            total + &allocation.future_value()
+        })
     }
 
-    fn sum_target_ratios(&self) -> d128 {
-        self.allocations
-            .iter()
-            .fold(d128::zero(), |total, allocation| {
-                total + &allocation.target_ratio
-            })
+    fn sum_target_ratios(&self) -> Decimal {
+        self.allocations.iter().fold(0.into(), |total, allocation| {
+            total + &allocation.target_ratio
+        })
     }
 
     fn num_asset_classes(&self) -> usize {
@@ -115,27 +107,27 @@ impl Portfolio {
             portfolio_total, new_total
         );
         for asset in self.allocations.iter() {
-            let start_ratio = asset.current_value() / portfolio_total;
+            let start_ratio: Decimal = asset.current_value() / portfolio_total;
             println!(
                 "Contribute ${:?} to {:?}",
                 asset.future_contribution, asset.asset_class
             );
             println!(
                 "    Target: {:?} Start: {:?}% Final: {:?}%",
-                asset.target_ratio * d128!(100),
-                start_ratio * d128!(100),
-                asset.percent_holdings(new_total) * d128!(100)
+                asset.target_ratio,
+                start_ratio,
+                asset.percent_holdings(new_total)
             );
         }
     }
 }
 
-pub fn optimally_allocate(mut portfolio: Portfolio, contribution: d128) -> Portfolio {
-    if contribution.is_zero() {
+pub fn optimally_allocate(mut portfolio: Portfolio, contribution: Decimal) -> Portfolio {
+    if contribution == 0.into() {
         panic!("Must deposit or withdraw in order to rebalance");
     }
 
-    if portfolio.sum_target_ratios() != d128!(1) {
+    if portfolio.sum_target_ratios() != 1.into() {
         panic!("Cannot rebalance unless total is 100%");
     }
 
@@ -150,18 +142,18 @@ pub fn optimally_allocate(mut portfolio: Portfolio, contribution: d128) -> Portf
     // We sort our asset allocations by how much they've deviated from their target
     // If contributing: underallocated funds come first. Overallocated funds come last.
     // If withdrawing: overallocated funds come first. Underallocated funds come last.
-    portfolio.allocations.sort_by(|a, b| {
-        OrdVar::new(a.deviation(new_total)).cmp(&OrdVar::new(b.deviation(new_total)))
-    });
-    if contribution.is_negative() {
+    portfolio
+        .allocations
+        .sort_by(|a, b| a.deviation(new_total).cmp(&b.deviation(new_total)));
+    if contribution.is_sign_negative() {
         portfolio.allocations.reverse();
     }
 
     let num_assets = portfolio.num_asset_classes();
 
-    let (deviation_target, index_to_stop): (d128, usize) = {
+    let (deviation_target, index_to_stop): (Decimal, usize) = {
         // As we loop through assets, we track the sum of all ideal fund values
-        let mut summed_targets_of_affected_assets = d128::zero();
+        let mut summed_targets_of_affected_assets: Decimal = 0.into();
 
         // We iterate through assets based on which need alteration first (to minimize variation)
         // We may not end up depositing/withdrawing from all accounts.
@@ -171,11 +163,11 @@ pub fn optimally_allocate(mut portfolio: Portfolio, contribution: d128) -> Portf
         // 2. The fractional deviation used to calculate the magnitude of deposits/withdrawals
         //    `deviation_target` will be the deviation (or "approximation error") of the last
         //    asset class we're optimizing.
-        let mut deviation_target = d128::zero();
+        let mut deviation_target = 0.into();
         let mut last_known_index = 0;
 
         for (index, asset) in portfolio.allocations.iter().enumerate() {
-            assert!(amount_left_to_contribute.abs() > d128::zero());
+            assert!(amount_left_to_contribute.abs() > 0.into());
 
             // Because we have money left to distribute, we know the asset at portfolio.allocations[index] will
             // be affected (receiving deposits if amount > 0, or withdrawn if amount < 0)
@@ -195,20 +187,20 @@ pub fn optimally_allocate(mut portfolio: Portfolio, contribution: d128) -> Portf
             // Peek ahead in the vector to get the asset which is the second-most underallocated
             // (We will contribute proportionally until all assets are at least that close to their target)
             let next_lowest_deviation = if index >= (num_assets - 1) {
-                d128::zero()
+                0.into()
             } else {
                 portfolio.allocations[index + 1].deviation(new_total)
             };
 
             // Solve for the amount that brings this asset as close to its target as the next closest
-            let delta =
+            let delta: Decimal =
                 summed_targets_of_affected_assets * (next_lowest_deviation - deviation_target);
 
             if delta.abs() > amount_left_to_contribute.abs() {
                 // If we don't have enough money left to contribute the full amount, then we'll
                 // dedicate what's left to the given fund, and exit.
                 deviation_target += amount_left_to_contribute / summed_targets_of_affected_assets;
-                amount_left_to_contribute = d128::zero();
+                amount_left_to_contribute = 0.into();
             } else {
                 // Otherwise, this asset is now as close to its target as the next worst asset(s)
                 // We continue by bringing these assets closer to their targets
@@ -220,7 +212,7 @@ pub fn optimally_allocate(mut portfolio: Portfolio, contribution: d128) -> Portf
             // 1. We contributed the exact amount to bring the asset as close to its target as the
             //    next worst (rare, but possible)
             // 2. We were not able to contribute the full amount, so we contributed what was left
-            if amount_left_to_contribute.is_zero() {
+            if amount_left_to_contribute == 0.into() {
                 break;
             }
         }
@@ -246,19 +238,19 @@ pub fn optimally_allocate(mut portfolio: Portfolio, contribution: d128) -> Portf
 
 #[test]
 fn test_adds_to_1() {
-    let terrible_allocation = AssetAllocation::new(AssetClass::Cash, d128!(1));
+    let terrible_allocation = AssetAllocation::new(AssetClass::Cash, 1.into());
     let portfolio = Portfolio::new(vec![terrible_allocation]);
-    optimally_allocate(portfolio, d128!(1_000));
+    optimally_allocate(portfolio, 1_000.into());
 }
 
 #[test]
 #[should_panic(expected = "Cannot rebalance unless total is 100%")]
 fn test_ratios_do_not_sum() {
     let does_not_sum = vec![
-        AssetAllocation::new(AssetClass::USStocks, d128!(0.3)),
-        AssetAllocation::new(AssetClass::USBonds, d128!(0.3)),
+        AssetAllocation::new(AssetClass::USStocks, Decimal::new(3, 1)),
+        AssetAllocation::new(AssetClass::USBonds, Decimal::new(3, 1)),
     ];
     let portfolio = Portfolio::new(does_not_sum);
 
-    optimally_allocate(portfolio, d128!(1000));
+    optimally_allocate(portfolio, 1_000.into());
 }

@@ -5,6 +5,5 @@ authors = ["David Cain <davidjosephcain@gmail.com>"]
 
 [dependencies]
 quick-xml = "0.13.1"
-decimal = "2.0.4"
+rust_decimal = "0.10.2"
 chrono = "0.4.6"
-ord_subset = "3"

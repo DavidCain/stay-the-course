@@ -1,6 +1,6 @@
-extern crate decimal;
+extern crate rust_decimal;
 
-use self::decimal::d128;
+use self::rust_decimal::Decimal;
 
 mod assets;
 mod gnucash;
@@ -17,6 +17,7 @@ fn main() {
     // From those ideal allocations, identify the best way to invest a lump sum
     let portfolio = book.portfolio_status(ideal_allocations);
 
-    let balanced_portfolio = rebalance::optimally_allocate(portfolio, d128!(3000));
+    let amount: Decimal = 3000.into();
+    let balanced_portfolio = rebalance::optimally_allocate(portfolio, amount);
     balanced_portfolio.describe_future_contributions();
 }

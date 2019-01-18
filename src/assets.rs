@@ -1,12 +1,12 @@
-extern crate decimal;
+extern crate rust_decimal;
 
-use self::decimal::d128;
+use self::rust_decimal::Decimal;
 
 #[derive(Debug)]
 pub struct Asset {
     pub asset_class: AssetClass,
     pub name: String,
-    pub value: d128,
+    pub value: Decimal,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
