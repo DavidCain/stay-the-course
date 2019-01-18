@@ -103,20 +103,20 @@ impl Portfolio {
         let new_total = self.future_value();
 
         println!(
-            "Portfolio value before: {:?} after: {:?}",
+            "Portfolio value before: ${:.0} after: ${:.0}",
             portfolio_total, new_total
         );
         for asset in self.allocations.iter() {
             let start_ratio: Decimal = asset.current_value() / portfolio_total;
             println!(
-                "Contribute ${:?} to {:?}",
+                "Contribute ${:.2} to {:?}",
                 asset.future_contribution, asset.asset_class
             );
             println!(
-                "    Target: {:?} Start: {:?}% Final: {:?}%",
-                asset.target_ratio,
-                start_ratio,
-                asset.percent_holdings(new_total)
+                "  {:.2}% -> {:.2}% (target: {:.2}%)",
+                start_ratio * Decimal::new(100, 0),
+                asset.percent_holdings(new_total) * Decimal::new(100, 0),
+                asset.target_ratio * Decimal::new(100, 0),
             );
         }
     }

@@ -516,6 +516,7 @@ impl Book {
             by_asset_class.insert(allocation.asset_class.clone(), allocation);
         }
 
+        println!("Current assets held:");
         for account in self.account_by_guid.values() {
             let price = self
                 .pricedb
@@ -529,7 +530,7 @@ impl Book {
             }
 
             println!(
-                "{:?}: ${:?} ({:?} x {:?})",
+                " - {:}: ${:.2} ({:} x ${:.2})",
                 account.name,
                 value,
                 account.current_quantity(),
