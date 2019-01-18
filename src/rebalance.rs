@@ -76,7 +76,7 @@ impl Portfolio {
         Portfolio { allocations }
     }
 
-    fn current_value(&self) -> Decimal {
+    pub fn current_value(&self) -> Decimal {
         self.allocations.iter().fold(0.into(), |total, allocation| {
             total + &allocation.current_value()
         })
@@ -101,19 +101,22 @@ impl Portfolio {
     pub fn describe_future_contributions(&self) {
         let portfolio_total = self.current_value();
         let new_total = self.future_value();
+        let verb = if new_total < portfolio_total {
+            "Withdraw"
+        } else {
+            "Contribute"
+        };
+        println!("{:} the following amounts:", verb);
 
-        println!(
-            "Portfolio value before: ${:.0} after: ${:.0}",
-            portfolio_total, new_total
-        );
         for asset in self.allocations.iter() {
             let start_ratio: Decimal = asset.current_value() / portfolio_total;
             println!(
-                "Contribute ${:.2} to {:?}",
-                asset.future_contribution, asset.asset_class
+                " - {:?}: ${:.2}",
+                asset.asset_class,
+                asset.future_contribution.abs()
             );
             println!(
-                "  {:.2}% -> {:.2}% (target: {:.2}%)",
+                "   {:.2}% -> {:.2}% (target: {:.2}%)",
                 start_ratio * Decimal::new(100, 0),
                 asset.percent_holdings(new_total) * Decimal::new(100, 0),
                 asset.target_ratio * Decimal::new(100, 0),
