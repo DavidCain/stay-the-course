@@ -1,0 +1,1797 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<gnc-v2
+     xmlns:gnc="http://www.gnucash.org/XML/gnc"
+     xmlns:act="http://www.gnucash.org/XML/act"
+     xmlns:book="http://www.gnucash.org/XML/book"
+     xmlns:cd="http://www.gnucash.org/XML/cd"
+     xmlns:cmdty="http://www.gnucash.org/XML/cmdty"
+     xmlns:price="http://www.gnucash.org/XML/price"
+     xmlns:slot="http://www.gnucash.org/XML/slot"
+     xmlns:split="http://www.gnucash.org/XML/split"
+     xmlns:sx="http://www.gnucash.org/XML/sx"
+     xmlns:trn="http://www.gnucash.org/XML/trn"
+     xmlns:ts="http://www.gnucash.org/XML/ts"
+     xmlns:fs="http://www.gnucash.org/XML/fs"
+     xmlns:bgt="http://www.gnucash.org/XML/bgt"
+     xmlns:recurrence="http://www.gnucash.org/XML/recurrence"
+     xmlns:lot="http://www.gnucash.org/XML/lot"
+     xmlns:addr="http://www.gnucash.org/XML/addr"
+     xmlns:billterm="http://www.gnucash.org/XML/billterm"
+     xmlns:bt-days="http://www.gnucash.org/XML/bt-days"
+     xmlns:bt-prox="http://www.gnucash.org/XML/bt-prox"
+     xmlns:cust="http://www.gnucash.org/XML/cust"
+     xmlns:employee="http://www.gnucash.org/XML/employee"
+     xmlns:entry="http://www.gnucash.org/XML/entry"
+     xmlns:invoice="http://www.gnucash.org/XML/invoice"
+     xmlns:job="http://www.gnucash.org/XML/job"
+     xmlns:order="http://www.gnucash.org/XML/order"
+     xmlns:owner="http://www.gnucash.org/XML/owner"
+     xmlns:taxtable="http://www.gnucash.org/XML/taxtable"
+     xmlns:tte="http://www.gnucash.org/XML/tte"
+     xmlns:vendor="http://www.gnucash.org/XML/vendor">
+<gnc:count-data cd:type="book">1</gnc:count-data>
+<gnc:book version="2.0.0">
+<book:id type="guid">5d88cd91a3674154b23094f060aeb1c7</book:id>
+<book:slots>
+  <slot>
+    <slot:key>options</slot:key>
+    <slot:value type="frame">
+      <slot>
+        <slot:key>Budgeting</slot:key>
+        <slot:value type="frame"/>
+      </slot>
+    </slot:value>
+  </slot>
+</book:slots>
+<gnc:count-data cd:type="commodity">6</gnc:count-data>
+<gnc:count-data cd:type="account">17</gnc:count-data>
+<gnc:count-data cd:type="transaction">25</gnc:count-data>
+<gnc:count-data cd:type="price">14</gnc:count-data>
+<gnc:commodity version="2.0.0">
+  <cmdty:space>CURRENCY</cmdty:space>
+  <cmdty:id>USD</cmdty:id>
+  <cmdty:get_quotes/>
+  <cmdty:quote_source>currency</cmdty:quote_source>
+  <cmdty:quote_tz/>
+</gnc:commodity>
+<gnc:commodity version="2.0.0">
+  <cmdty:space>FUND</cmdty:space>
+  <cmdty:id>FZROX</cmdty:id>
+  <cmdty:name>Fidelity ZERO Total Market Index</cmdty:name>
+  <cmdty:fraction>10000</cmdty:fraction>
+  <cmdty:get_quotes/>
+  <cmdty:quote_source>alphavantage</cmdty:quote_source>
+</gnc:commodity>
+<gnc:commodity version="2.0.0">
+  <cmdty:space>FUND</cmdty:space>
+  <cmdty:id>VBTLX</cmdty:id>
+  <cmdty:name>Vanguard Total Bond Market Index Fund</cmdty:name>
+  <cmdty:fraction>10000</cmdty:fraction>
+  <cmdty:get_quotes/>
+  <cmdty:quote_source>alphavantage</cmdty:quote_source>
+  <cmdty:quote_tz/>
+</gnc:commodity>
+<gnc:commodity version="2.0.0">
+  <cmdty:space>FUND</cmdty:space>
+  <cmdty:id>VGSLX</cmdty:id>
+  <cmdty:name>Vanguard REIT Index Fund</cmdty:name>
+  <cmdty:fraction>10000</cmdty:fraction>
+  <cmdty:get_quotes/>
+  <cmdty:quote_source>alphavantage</cmdty:quote_source>
+  <cmdty:quote_tz/>
+</gnc:commodity>
+<gnc:commodity version="2.0.0">
+  <cmdty:space>FUND</cmdty:space>
+  <cmdty:id>VTIAX</cmdty:id>
+  <cmdty:name>Vanguard Total International Stock Index</cmdty:name>
+  <cmdty:xcode>921909818</cmdty:xcode>
+  <cmdty:fraction>10000</cmdty:fraction>
+  <cmdty:get_quotes/>
+  <cmdty:quote_source>alphavantage</cmdty:quote_source>
+  <cmdty:quote_tz/>
+</gnc:commodity>
+<gnc:commodity version="2.0.0">
+  <cmdty:space>FUND</cmdty:space>
+  <cmdty:id>VTSAX</cmdty:id>
+  <cmdty:name>Vanguard Total Stock Market Index</cmdty:name>
+  <cmdty:xcode>922908728</cmdty:xcode>
+  <cmdty:fraction>10000</cmdty:fraction>
+  <cmdty:get_quotes/>
+  <cmdty:quote_source>alphavantage</cmdty:quote_source>
+  <cmdty:quote_tz/>
+  <cmdty:slots>
+    <slot>
+      <slot:key>user_symbol</slot:key>
+      <slot:value type="string">VTSAX</slot:value>
+    </slot>
+  </cmdty:slots>
+</gnc:commodity>
+<gnc:commodity version="2.0.0">
+  <cmdty:space>template</cmdty:space>
+  <cmdty:id>template</cmdty:id>
+  <cmdty:name>template</cmdty:name>
+  <cmdty:xcode>template</cmdty:xcode>
+  <cmdty:fraction>1</cmdty:fraction>
+</gnc:commodity>
+<gnc:pricedb version="1">
+  <price>
+    <price:id type="guid">30603c8cf36542909933bdd738e38102</price:id>
+    <price:commodity>
+      <cmdty:space>FUND</cmdty:space>
+      <cmdty:id>FZROX</cmdty:id>
+    </price:commodity>
+    <price:currency>
+      <cmdty:space>CURRENCY</cmdty:space>
+      <cmdty:id>USD</cmdty:id>
+    </price:currency>
+    <price:time>
+      <ts:date>2019-01-17 00:00:00 -0800</ts:date>
+    </price:time>
+    <price:source>user:price-editor</price:source>
+    <price:type>last</price:type>
+    <price:value>921/100</price:value>
+  </price>
+  <price>
+    <price:id type="guid">82c1d6e0cae747e7ae03ddd78e433f47</price:id>
+    <price:commodity>
+      <cmdty:space>FUND</cmdty:space>
+      <cmdty:id>FZROX</cmdty:id>
+    </price:commodity>
+    <price:currency>
+      <cmdty:space>CURRENCY</cmdty:space>
+      <cmdty:id>USD</cmdty:id>
+    </price:currency>
+    <price:time>
+      <ts:date>2018-12-30 02:59:00 -0800</ts:date>
+    </price:time>
+    <price:source>user:price</price:source>
+    <price:type>transaction</price:type>
+    <price:value>8780001/1000000</price:value>
+  </price>
+  <price>
+    <price:id type="guid">5af7742b4d814e1da2a85dc9121fd9c8</price:id>
+    <price:commodity>
+      <cmdty:space>FUND</cmdty:space>
+      <cmdty:id>FZROX</cmdty:id>
+    </price:commodity>
+    <price:currency>
+      <cmdty:space>CURRENCY</cmdty:space>
+      <cmdty:id>USD</cmdty:id>
+    </price:currency>
+    <price:time>
+      <ts:date>2018-11-30 02:59:00 -0800</ts:date>
+    </price:time>
+    <price:source>user:price</price:source>
+    <price:type>transaction</price:type>
+    <price:value>9749991/1000000</price:value>
+  </price>
+  <price>
+    <price:id type="guid">c3cc096d00ac44ce88fe1d4d2a39533a</price:id>
+    <price:commodity>
+      <cmdty:space>FUND</cmdty:space>
+      <cmdty:id>FZROX</cmdty:id>
+    </price:commodity>
+    <price:currency>
+      <cmdty:space>CURRENCY</cmdty:space>
+      <cmdty:id>USD</cmdty:id>
+    </price:currency>
+    <price:time>
+      <ts:date>2018-10-31 03:59:00 -0700</ts:date>
+    </price:time>
+    <price:source>user:price</price:source>
+    <price:type>transaction</price:type>
+    <price:value>9559992/1000000</price:value>
+  </price>
+  <price>
+    <price:id type="guid">f89719dcc07b412ca1395ef46ff56d23</price:id>
+    <price:commodity>
+      <cmdty:space>FUND</cmdty:space>
+      <cmdty:id>FZROX</cmdty:id>
+    </price:commodity>
+    <price:currency>
+      <cmdty:space>CURRENCY</cmdty:space>
+      <cmdty:id>USD</cmdty:id>
+    </price:currency>
+    <price:time>
+      <ts:date>2018-09-28 00:00:00 -0700</ts:date>
+    </price:time>
+    <price:source>user:price</price:source>
+    <price:type>transaction</price:type>
+    <price:value>10320000/1000000</price:value>
+  </price>
+  <price>
+    <price:id type="guid">d30b7e84dad144a8b36db2b13f6396b1</price:id>
+    <price:commodity>
+      <cmdty:space>FUND</cmdty:space>
+      <cmdty:id>FZROX</cmdty:id>
+    </price:commodity>
+    <price:currency>
+      <cmdty:space>CURRENCY</cmdty:space>
+      <cmdty:id>USD</cmdty:id>
+    </price:currency>
+    <price:time>
+      <ts:date>2018-06-28 00:00:00 -0700</ts:date>
+    </price:time>
+    <price:source>user:price</price:source>
+    <price:type>transaction</price:type>
+    <price:value>10290000/1000000</price:value>
+  </price>
+  <price>
+    <price:id type="guid">a12941ae9f9b46afa81f502931c7a59e</price:id>
+    <price:commodity>
+      <cmdty:space>FUND</cmdty:space>
+      <cmdty:id>VBTLX</cmdty:id>
+    </price:commodity>
+    <price:currency>
+      <cmdty:space>CURRENCY</cmdty:space>
+      <cmdty:id>USD</cmdty:id>
+    </price:currency>
+    <price:time>
+      <ts:date>2019-01-17 00:00:00 -0800</ts:date>
+    </price:time>
+    <price:source>user:price-editor</price:source>
+    <price:type>last</price:type>
+    <price:value>261/25</price:value>
+  </price>
+  <price>
+    <price:id type="guid">13ce6fb1fd5b4a319f80e591f2274b6f</price:id>
+    <price:commodity>
+      <cmdty:space>FUND</cmdty:space>
+      <cmdty:id>VBTLX</cmdty:id>
+    </price:commodity>
+    <price:currency>
+      <cmdty:space>CURRENCY</cmdty:space>
+      <cmdty:id>USD</cmdty:id>
+    </price:currency>
+    <price:time>
+      <ts:date>2018-11-19 02:59:00 -0800</ts:date>
+    </price:time>
+    <price:source>user:price</price:source>
+    <price:type>transaction</price:type>
+    <price:value>10189999/1000000</price:value>
+  </price>
+  <price>
+    <price:id type="guid">29af57702e724f3eacbcbc855f1e989e</price:id>
+    <price:commodity>
+      <cmdty:space>FUND</cmdty:space>
+      <cmdty:id>VGSLX</cmdty:id>
+    </price:commodity>
+    <price:currency>
+      <cmdty:space>CURRENCY</cmdty:space>
+      <cmdty:id>USD</cmdty:id>
+    </price:currency>
+    <price:time>
+      <ts:date>2019-01-17 00:00:00 -0800</ts:date>
+    </price:time>
+    <price:source>user:price-editor</price:source>
+    <price:type>last</price:type>
+    <price:value>449/4</price:value>
+  </price>
+  <price>
+    <price:id type="guid">b639728023614f20b875c9849aca6b20</price:id>
+    <price:commodity>
+      <cmdty:space>FUND</cmdty:space>
+      <cmdty:id>VGSLX</cmdty:id>
+    </price:commodity>
+    <price:currency>
+      <cmdty:space>CURRENCY</cmdty:space>
+      <cmdty:id>USD</cmdty:id>
+    </price:currency>
+    <price:time>
+      <ts:date>2018-11-19 02:59:00 -0800</ts:date>
+    </price:time>
+    <price:source>user:price</price:source>
+    <price:type>transaction</price:type>
+    <price:value>114749960/1000000</price:value>
+  </price>
+  <price>
+    <price:id type="guid">d4fec562d7374c5a91bbac659061dd82</price:id>
+    <price:commodity>
+      <cmdty:space>FUND</cmdty:space>
+      <cmdty:id>VTIAX</cmdty:id>
+    </price:commodity>
+    <price:currency>
+      <cmdty:space>CURRENCY</cmdty:space>
+      <cmdty:id>USD</cmdty:id>
+    </price:currency>
+    <price:time>
+      <ts:date>2019-01-17 00:00:00 -0800</ts:date>
+    </price:time>
+    <price:source>user:price-editor</price:source>
+    <price:type>last</price:type>
+    <price:value>133/5</price:value>
+  </price>
+  <price>
+    <price:id type="guid">db08d3ddae2c44ec8899f10224c350b1</price:id>
+    <price:commodity>
+      <cmdty:space>FUND</cmdty:space>
+      <cmdty:id>VTIAX</cmdty:id>
+    </price:commodity>
+    <price:currency>
+      <cmdty:space>CURRENCY</cmdty:space>
+      <cmdty:id>USD</cmdty:id>
+    </price:currency>
+    <price:time>
+      <ts:date>2018-11-19 02:59:00 -0800</ts:date>
+    </price:time>
+    <price:source>user:price</price:source>
+    <price:type>transaction</price:type>
+    <price:value>26720012/1000000</price:value>
+  </price>
+  <price>
+    <price:id type="guid">feb0a84857aa47a89cb42b7a1fb79548</price:id>
+    <price:commodity>
+      <cmdty:space>FUND</cmdty:space>
+      <cmdty:id>VTSAX</cmdty:id>
+    </price:commodity>
+    <price:currency>
+      <cmdty:space>CURRENCY</cmdty:space>
+      <cmdty:id>USD</cmdty:id>
+    </price:currency>
+    <price:time>
+      <ts:date>2019-01-17 00:00:00 -0800</ts:date>
+    </price:time>
+    <price:source>user:price-editor</price:source>
+    <price:type>last</price:type>
+    <price:value>6567/100</price:value>
+  </price>
+  <price>
+    <price:id type="guid">11b5beb14231480e89072c64ae5eb1c0</price:id>
+    <price:commodity>
+      <cmdty:space>FUND</cmdty:space>
+      <cmdty:id>VTSAX</cmdty:id>
+    </price:commodity>
+    <price:currency>
+      <cmdty:space>CURRENCY</cmdty:space>
+      <cmdty:id>USD</cmdty:id>
+    </price:currency>
+    <price:time>
+      <ts:date>2018-12-24 02:59:00 -0800</ts:date>
+    </price:time>
+    <price:source>user:price</price:source>
+    <price:type>transaction</price:type>
+    <price:value>65669943/1000000</price:value>
+  </price>
+</gnc:pricedb>
+<gnc:account version="2.0.0">
+  <act:name>Root Account</act:name>
+  <act:id type="guid">abd5975eadff4b41b73720ad339bc604</act:id>
+  <act:type>ROOT</act:type>
+  <act:commodity>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </act:commodity>
+  <act:commodity-scu>100</act:commodity-scu>
+</gnc:account>
+<gnc:account version="2.0.0">
+  <act:name>Assets</act:name>
+  <act:id type="guid">e7a3a730dc8c4a6bada8b815fa0a474b</act:id>
+  <act:type>ASSET</act:type>
+  <act:commodity>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </act:commodity>
+  <act:commodity-scu>100</act:commodity-scu>
+  <act:description>Assets</act:description>
+  <act:slots>
+    <slot>
+      <slot:key>placeholder</slot:key>
+      <slot:value type="string">true</slot:value>
+    </slot>
+  </act:slots>
+  <act:parent type="guid">abd5975eadff4b41b73720ad339bc604</act:parent>
+</gnc:account>
+<gnc:account version="2.0.0">
+  <act:name>Investments</act:name>
+  <act:id type="guid">6e7cc4bdcde04495b224938e8ba6cfe7</act:id>
+  <act:type>ASSET</act:type>
+  <act:commodity>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </act:commodity>
+  <act:commodity-scu>100</act:commodity-scu>
+  <act:description>Investments</act:description>
+  <act:slots>
+    <slot>
+      <slot:key>placeholder</slot:key>
+      <slot:value type="string">true</slot:value>
+    </slot>
+  </act:slots>
+  <act:parent type="guid">e7a3a730dc8c4a6bada8b815fa0a474b</act:parent>
+</gnc:account>
+<gnc:account version="2.0.0">
+  <act:name>Vanguard</act:name>
+  <act:id type="guid">afeab98ac4ab48dcaa4fa4f0b77e6eaf</act:id>
+  <act:type>BANK</act:type>
+  <act:commodity>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </act:commodity>
+  <act:commodity-scu>100</act:commodity-scu>
+  <act:slots>
+    <slot>
+      <slot:key>color</slot:key>
+      <slot:value type="string">Not Set</slot:value>
+    </slot>
+  </act:slots>
+  <act:parent type="guid">6e7cc4bdcde04495b224938e8ba6cfe7</act:parent>
+</gnc:account>
+<gnc:account version="2.0.0">
+  <act:name>VTIAX</act:name>
+  <act:id type="guid">63b5b835f452486eaa54ec0b5b5e85b9</act:id>
+  <act:type>MUTUAL</act:type>
+  <act:commodity>
+    <cmdty:space>FUND</cmdty:space>
+    <cmdty:id>VTIAX</cmdty:id>
+  </act:commodity>
+  <act:commodity-scu>10000</act:commodity-scu>
+  <act:description>Vanguard Total International Stock Admiral Shares</act:description>
+  <act:slots>
+    <slot>
+      <slot:key>color</slot:key>
+      <slot:value type="string">Not Set</slot:value>
+    </slot>
+  </act:slots>
+  <act:parent type="guid">afeab98ac4ab48dcaa4fa4f0b77e6eaf</act:parent>
+</gnc:account>
+<gnc:account version="2.0.0">
+  <act:name>VTSAX</act:name>
+  <act:id type="guid">ff1617bac9c741e7bfcc124df2cf0d8f</act:id>
+  <act:type>MUTUAL</act:type>
+  <act:commodity>
+    <cmdty:space>FUND</cmdty:space>
+    <cmdty:id>VTSAX</cmdty:id>
+  </act:commodity>
+  <act:commodity-scu>10000</act:commodity-scu>
+  <act:description>Vanguard Total Stock Market  Admiral Shares</act:description>
+  <act:slots>
+    <slot>
+      <slot:key>color</slot:key>
+      <slot:value type="string">Not Set</slot:value>
+    </slot>
+  </act:slots>
+  <act:parent type="guid">afeab98ac4ab48dcaa4fa4f0b77e6eaf</act:parent>
+</gnc:account>
+<gnc:account version="2.0.0">
+  <act:name>VGSLX</act:name>
+  <act:id type="guid">cd8dbc8bb46047a19e22b7cf685e3150</act:id>
+  <act:type>MUTUAL</act:type>
+  <act:commodity>
+    <cmdty:space>FUND</cmdty:space>
+    <cmdty:id>VGSLX</cmdty:id>
+  </act:commodity>
+  <act:commodity-scu>10000</act:commodity-scu>
+  <act:code>VGSLX</act:code>
+  <act:description>Vanguard REIT Index Fund Admiral Shares</act:description>
+  <act:slots>
+    <slot>
+      <slot:key>color</slot:key>
+      <slot:value type="string">Not Set</slot:value>
+    </slot>
+  </act:slots>
+  <act:parent type="guid">afeab98ac4ab48dcaa4fa4f0b77e6eaf</act:parent>
+</gnc:account>
+<gnc:account version="2.0.0">
+  <act:name>VBTLX</act:name>
+  <act:id type="guid">318fc80d848a41579664fb300ee5e9b2</act:id>
+  <act:type>MUTUAL</act:type>
+  <act:commodity>
+    <cmdty:space>FUND</cmdty:space>
+    <cmdty:id>VBTLX</cmdty:id>
+  </act:commodity>
+  <act:commodity-scu>10000</act:commodity-scu>
+  <act:description>Vanguard Total Bond Market Admiral Shares</act:description>
+  <act:slots>
+    <slot>
+      <slot:key>color</slot:key>
+      <slot:value type="string">Not Set</slot:value>
+    </slot>
+  </act:slots>
+  <act:parent type="guid">afeab98ac4ab48dcaa4fa4f0b77e6eaf</act:parent>
+</gnc:account>
+<gnc:account version="2.0.0">
+  <act:name>401(k)</act:name>
+  <act:id type="guid">004871fe966248048fe620bc9b83f821</act:id>
+  <act:type>ASSET</act:type>
+  <act:commodity>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </act:commodity>
+  <act:commodity-scu>100</act:commodity-scu>
+  <act:slots>
+    <slot>
+      <slot:key>color</slot:key>
+      <slot:value type="string">Not Set</slot:value>
+    </slot>
+  </act:slots>
+  <act:parent type="guid">6e7cc4bdcde04495b224938e8ba6cfe7</act:parent>
+</gnc:account>
+<gnc:account version="2.0.0">
+  <act:name>FZROX</act:name>
+  <act:id type="guid">265ef2962d064a3ba0815fc91712a497</act:id>
+  <act:type>MUTUAL</act:type>
+  <act:commodity>
+    <cmdty:space>FUND</cmdty:space>
+    <cmdty:id>FZROX</cmdty:id>
+  </act:commodity>
+  <act:commodity-scu>10000</act:commodity-scu>
+  <act:description>Fidelity ZERO Total Market Index</act:description>
+  <act:slots>
+    <slot>
+      <slot:key>color</slot:key>
+      <slot:value type="string">Not Set</slot:value>
+    </slot>
+  </act:slots>
+  <act:parent type="guid">004871fe966248048fe620bc9b83f821</act:parent>
+</gnc:account>
+<gnc:account version="2.0.0">
+  <act:name>Checking</act:name>
+  <act:id type="guid">d15f38eda7894102984697722140f7db</act:id>
+  <act:type>ASSET</act:type>
+  <act:commodity>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </act:commodity>
+  <act:commodity-scu>100</act:commodity-scu>
+  <act:description>Checking Account</act:description>
+  <act:slots>
+    <slot>
+      <slot:key>color</slot:key>
+      <slot:value type="string">Not Set</slot:value>
+    </slot>
+  </act:slots>
+  <act:parent type="guid">e7a3a730dc8c4a6bada8b815fa0a474b</act:parent>
+</gnc:account>
+<gnc:account version="2.0.0">
+  <act:name>Income</act:name>
+  <act:id type="guid">d6a01bdd4fc04012aa4fc223bf25ba35</act:id>
+  <act:type>INCOME</act:type>
+  <act:commodity>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </act:commodity>
+  <act:commodity-scu>100</act:commodity-scu>
+  <act:description>Income</act:description>
+  <act:slots>
+    <slot>
+      <slot:key>placeholder</slot:key>
+      <slot:value type="string">true</slot:value>
+    </slot>
+  </act:slots>
+  <act:parent type="guid">abd5975eadff4b41b73720ad339bc604</act:parent>
+</gnc:account>
+<gnc:account version="2.0.0">
+  <act:name>Dividend Income</act:name>
+  <act:id type="guid">3f4d045cc2b34706877be5ecfebf0bbb</act:id>
+  <act:type>INCOME</act:type>
+  <act:commodity>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </act:commodity>
+  <act:commodity-scu>100</act:commodity-scu>
+  <act:description>Dividend Income</act:description>
+  <act:parent type="guid">d6a01bdd4fc04012aa4fc223bf25ba35</act:parent>
+</gnc:account>
+<gnc:account version="2.0.0">
+  <act:name>ExampleCorp</act:name>
+  <act:id type="guid">8b126bebf21d4ade85c3ba6a01d60504</act:id>
+  <act:type>INCOME</act:type>
+  <act:commodity>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </act:commodity>
+  <act:commodity-scu>100</act:commodity-scu>
+  <act:slots>
+    <slot>
+      <slot:key>color</slot:key>
+      <slot:value type="string">Not Set</slot:value>
+    </slot>
+  </act:slots>
+  <act:parent type="guid">d6a01bdd4fc04012aa4fc223bf25ba35</act:parent>
+</gnc:account>
+<gnc:account version="2.0.0">
+  <act:name>Expenses</act:name>
+  <act:id type="guid">b0195a41ba9b4ec3b3d11536cb54682d</act:id>
+  <act:type>EXPENSE</act:type>
+  <act:commodity>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </act:commodity>
+  <act:commodity-scu>100</act:commodity-scu>
+  <act:description>Expenses</act:description>
+  <act:slots>
+    <slot>
+      <slot:key>placeholder</slot:key>
+      <slot:value type="string">true</slot:value>
+    </slot>
+  </act:slots>
+  <act:parent type="guid">abd5975eadff4b41b73720ad339bc604</act:parent>
+</gnc:account>
+<gnc:account version="2.0.0">
+  <act:name>Taxes</act:name>
+  <act:id type="guid">7a09c8f210de469285a51133e023f63f</act:id>
+  <act:type>EXPENSE</act:type>
+  <act:commodity>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </act:commodity>
+  <act:commodity-scu>100</act:commodity-scu>
+  <act:description>All taxes</act:description>
+  <act:slots>
+    <slot>
+      <slot:key>color</slot:key>
+      <slot:value type="string">Not Set</slot:value>
+    </slot>
+  </act:slots>
+  <act:parent type="guid">b0195a41ba9b4ec3b3d11536cb54682d</act:parent>
+</gnc:account>
+<gnc:account version="2.0.0">
+  <act:name>Life</act:name>
+  <act:id type="guid">4d51f1cac11e40f7a09d62513a82855b</act:id>
+  <act:type>EXPENSE</act:type>
+  <act:commodity>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </act:commodity>
+  <act:commodity-scu>100</act:commodity-scu>
+  <act:description>General expenses</act:description>
+  <act:slots>
+    <slot>
+      <slot:key>color</slot:key>
+      <slot:value type="string">Not Set</slot:value>
+    </slot>
+  </act:slots>
+  <act:parent type="guid">b0195a41ba9b4ec3b3d11536cb54682d</act:parent>
+</gnc:account>
+<gnc:transaction version="2.0.0">
+  <trn:id type="guid">2451248c758a4bd5a878cb56107664d1</trn:id>
+  <trn:currency>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </trn:currency>
+  <trn:date-posted>
+    <ts:date>2018-11-19 02:59:00 -0800</ts:date>
+  </trn:date-posted>
+  <trn:date-entered>
+    <ts:date>2019-01-17 21:14:34 -0800</ts:date>
+  </trn:date-entered>
+  <trn:description>Open Admiral Shares</trn:description>
+  <trn:slots>
+    <slot>
+      <slot:key>date-posted</slot:key>
+      <slot:value type="gdate">
+        <gdate>2018-11-19</gdate>
+      </slot:value>
+    </slot>
+  </trn:slots>
+  <trn:splits>
+    <trn:split>
+      <split:id type="guid">4a587996431346a29358984fe87922f6</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>300000/100</split:value>
+      <split:quantity>1122754/10000</split:quantity>
+      <split:account type="guid">63b5b835f452486eaa54ec0b5b5e85b9</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">69ad0ed26b3b44a88f4983ad257f6f7e</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>-300000/100</split:value>
+      <split:quantity>-300000/100</split:quantity>
+      <split:account type="guid">d15f38eda7894102984697722140f7db</split:account>
+    </trn:split>
+  </trn:splits>
+</gnc:transaction>
+<gnc:transaction version="2.0.0">
+  <trn:id type="guid">a12541dc26a6449aa44e81f8d8a4a186</trn:id>
+  <trn:currency>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </trn:currency>
+  <trn:date-posted>
+    <ts:date>2019-01-17 02:59:00 -0800</ts:date>
+  </trn:date-posted>
+  <trn:date-entered>
+    <ts:date>2019-01-17 21:34:50 -0800</ts:date>
+  </trn:date-entered>
+  <trn:description>Buy - minimize deviation from target allocation (45.9% US Stocks, 36.7% International Stocks, 9.2% REIT, 8.2% US Bonds)</trn:description>
+  <trn:slots>
+    <slot>
+      <slot:key>date-posted</slot:key>
+      <slot:value type="gdate">
+        <gdate>2019-01-17</gdate>
+      </slot:value>
+    </slot>
+  </trn:slots>
+  <trn:splits>
+    <trn:split>
+      <split:id type="guid">53dccac0599949e7839de61d50d88b6c</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>206028/100</split:value>
+      <split:quantity>313732/10000</split:quantity>
+      <split:account type="guid">ff1617bac9c741e7bfcc124df2cf0d8f</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">e0ae76c53c514aa7a7b8ebfe4b92bc9b</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>93972/100</split:value>
+      <split:quantity>353278/10000</split:quantity>
+      <split:account type="guid">63b5b835f452486eaa54ec0b5b5e85b9</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">e07054f60ebc422aa8f47239ca5228ed</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>-300000/100</split:value>
+      <split:quantity>-300000/100</split:quantity>
+      <split:account type="guid">d15f38eda7894102984697722140f7db</split:account>
+    </trn:split>
+  </trn:splits>
+</gnc:transaction>
+<gnc:transaction version="2.0.0">
+  <trn:id type="guid">291d5bcd92734fa2aa473eabc2ce9c86</trn:id>
+  <trn:currency>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </trn:currency>
+  <trn:date-posted>
+    <ts:date>2018-12-24 02:59:00 -0800</ts:date>
+  </trn:date-posted>
+  <trn:date-entered>
+    <ts:date>2019-01-17 21:28:06 -0800</ts:date>
+  </trn:date-entered>
+  <trn:description>Open Admiral Shares</trn:description>
+  <trn:slots>
+    <slot>
+      <slot:key>date-posted</slot:key>
+      <slot:value type="gdate">
+        <gdate>2018-12-24</gdate>
+      </slot:value>
+    </slot>
+    <slot>
+      <slot:key>notes</slot:key>
+      <slot:value type="string"></slot:value>
+    </slot>
+  </trn:slots>
+  <trn:splits>
+    <trn:split>
+      <split:id type="guid">98ffc94f3e7e46218ebcdab01a29408e</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>300000/100</split:value>
+      <split:quantity>456830/10000</split:quantity>
+      <split:account type="guid">ff1617bac9c741e7bfcc124df2cf0d8f</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">0e4c23e91467495ba818f6d097bf72ff</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>-300000/100</split:value>
+      <split:quantity>-300000/100</split:quantity>
+      <split:account type="guid">d15f38eda7894102984697722140f7db</split:account>
+    </trn:split>
+  </trn:splits>
+</gnc:transaction>
+<gnc:transaction version="2.0.0">
+  <trn:id type="guid">c954a8e4dd964cbea78ee5ed8f8f782a</trn:id>
+  <trn:currency>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </trn:currency>
+  <trn:date-posted>
+    <ts:date>2018-11-19 02:59:00 -0800</ts:date>
+  </trn:date-posted>
+  <trn:date-entered>
+    <ts:date>2019-01-17 21:20:31 -0800</ts:date>
+  </trn:date-entered>
+  <trn:description>Open Admiral Shares</trn:description>
+  <trn:slots>
+    <slot>
+      <slot:key>date-posted</slot:key>
+      <slot:value type="gdate">
+        <gdate>2018-11-19</gdate>
+      </slot:value>
+    </slot>
+    <slot>
+      <slot:key>notes</slot:key>
+      <slot:value type="string"></slot:value>
+    </slot>
+  </trn:slots>
+  <trn:splits>
+    <trn:split>
+      <split:id type="guid">92b1d3a16baa425c84bcedddba943b4d</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>300000/100</split:value>
+      <split:quantity>261438/10000</split:quantity>
+      <split:account type="guid">cd8dbc8bb46047a19e22b7cf685e3150</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">a35997c874d844cda4146a2150c6a4b6</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>-300000/100</split:value>
+      <split:quantity>-300000/100</split:quantity>
+      <split:account type="guid">d15f38eda7894102984697722140f7db</split:account>
+    </trn:split>
+  </trn:splits>
+</gnc:transaction>
+<gnc:transaction version="2.0.0">
+  <trn:id type="guid">cad0ff3861e24c1cb5c3e3ec83b83bf6</trn:id>
+  <trn:currency>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </trn:currency>
+  <trn:date-posted>
+    <ts:date>2018-11-19 02:59:00 -0800</ts:date>
+  </trn:date-posted>
+  <trn:date-entered>
+    <ts:date>2019-01-17 21:15:51 -0800</ts:date>
+  </trn:date-entered>
+  <trn:description>Open Admiral Shares</trn:description>
+  <trn:slots>
+    <slot>
+      <slot:key>date-posted</slot:key>
+      <slot:value type="gdate">
+        <gdate>2018-11-19</gdate>
+      </slot:value>
+    </slot>
+    <slot>
+      <slot:key>notes</slot:key>
+      <slot:value type="string"></slot:value>
+    </slot>
+  </trn:slots>
+  <trn:splits>
+    <trn:split>
+      <split:id type="guid">87418b994954413f83c0a64a73293aef</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>300000/100</split:value>
+      <split:quantity>2944063/10000</split:quantity>
+      <split:account type="guid">318fc80d848a41579664fb300ee5e9b2</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">cbe029b5d95a4dc2ae3e1273cd4822f7</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>-300000/100</split:value>
+      <split:quantity>-300000/100</split:quantity>
+      <split:account type="guid">d15f38eda7894102984697722140f7db</split:account>
+    </trn:split>
+  </trn:splits>
+</gnc:transaction>
+<gnc:transaction version="2.0.0">
+  <trn:id type="guid">544ec57439054d8c9d733c00a90cb62e</trn:id>
+  <trn:currency>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </trn:currency>
+  <trn:date-posted>
+    <ts:date>2018-08-30 03:59:00 -0700</ts:date>
+  </trn:date-posted>
+  <trn:date-entered>
+    <ts:date>2019-01-17 21:16:10 -0800</ts:date>
+  </trn:date-entered>
+  <trn:description>Paycheck</trn:description>
+  <trn:slots>
+    <slot>
+      <slot:key>date-posted</slot:key>
+      <slot:value type="gdate">
+        <gdate>2018-08-30</gdate>
+      </slot:value>
+    </slot>
+    <slot>
+      <slot:key>notes</slot:key>
+      <slot:value type="string"></slot:value>
+    </slot>
+  </trn:slots>
+  <trn:splits>
+    <trn:split>
+      <split:id type="guid">97006b5987064f43b73261c51bd84d4d</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>300000/100</split:value>
+      <split:quantity>300000/100</split:quantity>
+      <split:account type="guid">d15f38eda7894102984697722140f7db</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">4d49396261bd4715ac915a853ba53a8f</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>100000/100</split:value>
+      <split:quantity>100000/100</split:quantity>
+      <split:account type="guid">7a09c8f210de469285a51133e023f63f</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">16f6beb9fc6146b2bd168356e1f5e6be</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>50000/100</split:value>
+      <split:quantity>485909/10000</split:quantity>
+      <split:account type="guid">265ef2962d064a3ba0815fc91712a497</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">30978dd9bdb9461d82542e49358b9286</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>-450000/100</split:value>
+      <split:quantity>-450000/100</split:quantity>
+      <split:account type="guid">8b126bebf21d4ade85c3ba6a01d60504</split:account>
+    </trn:split>
+  </trn:splits>
+</gnc:transaction>
+<gnc:transaction version="2.0.0">
+  <trn:id type="guid">ed52c4f3d40d4ab1a4cd44de606b75fd</trn:id>
+  <trn:currency>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </trn:currency>
+  <trn:date-posted>
+    <ts:date>2018-09-28 03:59:00 -0700</ts:date>
+  </trn:date-posted>
+  <trn:date-entered>
+    <ts:date>2019-01-17 21:03:11 -0800</ts:date>
+  </trn:date-entered>
+  <trn:description>Paycheck</trn:description>
+  <trn:slots>
+    <slot>
+      <slot:key>date-posted</slot:key>
+      <slot:value type="gdate">
+        <gdate>2018-09-28</gdate>
+      </slot:value>
+    </slot>
+    <slot>
+      <slot:key>notes</slot:key>
+      <slot:value type="string"></slot:value>
+    </slot>
+  </trn:slots>
+  <trn:splits>
+    <trn:split>
+      <split:id type="guid">0e94a1161c974aa6ad8185e370bfc28f</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>300000/100</split:value>
+      <split:quantity>300000/100</split:quantity>
+      <split:account type="guid">d15f38eda7894102984697722140f7db</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">77b857e5bdd84ae39052b93fddeb2b5e</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>100000/100</split:value>
+      <split:quantity>100000/100</split:quantity>
+      <split:account type="guid">7a09c8f210de469285a51133e023f63f</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">70b0d96cc42042499597740ba2e6c628</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>50000/100</split:value>
+      <split:quantity>484496/10000</split:quantity>
+      <split:account type="guid">265ef2962d064a3ba0815fc91712a497</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">c3f5c9db233b4dc6a72e462568ea6e4f</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>-450000/100</split:value>
+      <split:quantity>-450000/100</split:quantity>
+      <split:account type="guid">8b126bebf21d4ade85c3ba6a01d60504</split:account>
+    </trn:split>
+  </trn:splits>
+</gnc:transaction>
+<gnc:transaction version="2.0.0">
+  <trn:id type="guid">16677c0bdc3c4d999671b767e3efc91b</trn:id>
+  <trn:currency>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </trn:currency>
+  <trn:date-posted>
+    <ts:date>2018-10-31 03:59:00 -0700</ts:date>
+  </trn:date-posted>
+  <trn:date-entered>
+    <ts:date>2019-01-17 20:16:15 -0800</ts:date>
+  </trn:date-entered>
+  <trn:description>Paycheck</trn:description>
+  <trn:slots>
+    <slot>
+      <slot:key>date-posted</slot:key>
+      <slot:value type="gdate">
+        <gdate>2018-10-31</gdate>
+      </slot:value>
+    </slot>
+  </trn:slots>
+  <trn:splits>
+    <trn:split>
+      <split:id type="guid">3a8d37c8e12b4e53a55cad7df3d6b685</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>300000/100</split:value>
+      <split:quantity>300000/100</split:quantity>
+      <split:account type="guid">d15f38eda7894102984697722140f7db</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">9e26d6d64fa346e8b143d3c0dccaf8b6</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>100000/100</split:value>
+      <split:quantity>100000/100</split:quantity>
+      <split:account type="guid">7a09c8f210de469285a51133e023f63f</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">60bda7e5e4134de191b60f8cd09274e5</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>50000/100</split:value>
+      <split:quantity>523013/10000</split:quantity>
+      <split:account type="guid">265ef2962d064a3ba0815fc91712a497</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">4457c0aebbee4e3e9c1f8c35d77a100e</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>-450000/100</split:value>
+      <split:quantity>-450000/100</split:quantity>
+      <split:account type="guid">8b126bebf21d4ade85c3ba6a01d60504</split:account>
+    </trn:split>
+  </trn:splits>
+</gnc:transaction>
+<gnc:transaction version="2.0.0">
+  <trn:id type="guid">a31fec7a79854ab78ffaa2163b809d50</trn:id>
+  <trn:currency>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </trn:currency>
+  <trn:date-posted>
+    <ts:date>2018-11-30 02:59:00 -0800</ts:date>
+  </trn:date-posted>
+  <trn:date-entered>
+    <ts:date>2019-01-17 20:19:31 -0800</ts:date>
+  </trn:date-entered>
+  <trn:description>Paycheck</trn:description>
+  <trn:slots>
+    <slot>
+      <slot:key>date-posted</slot:key>
+      <slot:value type="gdate">
+        <gdate>2018-11-30</gdate>
+      </slot:value>
+    </slot>
+    <slot>
+      <slot:key>notes</slot:key>
+      <slot:value type="string"></slot:value>
+    </slot>
+  </trn:slots>
+  <trn:splits>
+    <trn:split>
+      <split:id type="guid">9931c74ca4504b89b5e69d21daa8070a</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>300000/100</split:value>
+      <split:quantity>300000/100</split:quantity>
+      <split:account type="guid">d15f38eda7894102984697722140f7db</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">4dee471db2eb4ef280032c97990a335e</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>100000/100</split:value>
+      <split:quantity>100000/100</split:quantity>
+      <split:account type="guid">7a09c8f210de469285a51133e023f63f</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">926eb7e5aedb4b79a455e587eeb8f881</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>50000/100</split:value>
+      <split:quantity>512821/10000</split:quantity>
+      <split:account type="guid">265ef2962d064a3ba0815fc91712a497</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">ce3e0f75af0a46938155699bb5bb4e96</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>-450000/100</split:value>
+      <split:quantity>-450000/100</split:quantity>
+      <split:account type="guid">8b126bebf21d4ade85c3ba6a01d60504</split:account>
+    </trn:split>
+  </trn:splits>
+</gnc:transaction>
+<gnc:transaction version="2.0.0">
+  <trn:id type="guid">82da99aa64c448e49f4a3446382d3db0</trn:id>
+  <trn:currency>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </trn:currency>
+  <trn:date-posted>
+    <ts:date>2018-12-31 02:59:00 -0800</ts:date>
+  </trn:date-posted>
+  <trn:date-entered>
+    <ts:date>2019-01-17 20:19:37 -0800</ts:date>
+  </trn:date-entered>
+  <trn:description>Paycheck</trn:description>
+  <trn:slots>
+    <slot>
+      <slot:key>date-posted</slot:key>
+      <slot:value type="gdate">
+        <gdate>2018-12-31</gdate>
+      </slot:value>
+    </slot>
+    <slot>
+      <slot:key>notes</slot:key>
+      <slot:value type="string"></slot:value>
+    </slot>
+  </trn:slots>
+  <trn:splits>
+    <trn:split>
+      <split:id type="guid">3e94d94bfc7a4f96a416a2a973462d8c</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>300000/100</split:value>
+      <split:quantity>300000/100</split:quantity>
+      <split:account type="guid">d15f38eda7894102984697722140f7db</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">14d898ab1e2a460389beb544a0dd5892</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>100000/100</split:value>
+      <split:quantity>100000/100</split:quantity>
+      <split:account type="guid">7a09c8f210de469285a51133e023f63f</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">2a918b5df1494626ae26310d38de16d5</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>50000/100</split:value>
+      <split:quantity>569476/10000</split:quantity>
+      <split:account type="guid">265ef2962d064a3ba0815fc91712a497</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">bc3874cbf4c14be184bd2150df582a1b</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>-450000/100</split:value>
+      <split:quantity>-450000/100</split:quantity>
+      <split:account type="guid">8b126bebf21d4ade85c3ba6a01d60504</split:account>
+    </trn:split>
+  </trn:splits>
+</gnc:transaction>
+<gnc:transaction version="2.0.0">
+  <trn:id type="guid">93137c16b2344d8d8815df1b22c5445d</trn:id>
+  <trn:currency>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </trn:currency>
+  <trn:date-posted>
+    <ts:date>2018-03-30 03:59:00 -0700</ts:date>
+  </trn:date-posted>
+  <trn:date-entered>
+    <ts:date>2019-01-17 21:23:16 -0800</ts:date>
+  </trn:date-entered>
+  <trn:description>Paycheck</trn:description>
+  <trn:slots>
+    <slot>
+      <slot:key>date-posted</slot:key>
+      <slot:value type="gdate">
+        <gdate>2018-03-30</gdate>
+      </slot:value>
+    </slot>
+    <slot>
+      <slot:key>notes</slot:key>
+      <slot:value type="string"></slot:value>
+    </slot>
+  </trn:slots>
+  <trn:splits>
+    <trn:split>
+      <split:id type="guid">4bdf3d6a1072463d9e2109500024b855</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>350000/100</split:value>
+      <split:quantity>350000/100</split:quantity>
+      <split:account type="guid">d15f38eda7894102984697722140f7db</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">a93d9d4dc87e49988dab13fcafa35804</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>100000/100</split:value>
+      <split:quantity>100000/100</split:quantity>
+      <split:account type="guid">7a09c8f210de469285a51133e023f63f</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">3087dccd8c7b4575a6335d748eb6b33f</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>-450000/100</split:value>
+      <split:quantity>-450000/100</split:quantity>
+      <split:account type="guid">8b126bebf21d4ade85c3ba6a01d60504</split:account>
+    </trn:split>
+  </trn:splits>
+</gnc:transaction>
+<gnc:transaction version="2.0.0">
+  <trn:id type="guid">53f95bd0c75f49bfbc68ac8274e7826f</trn:id>
+  <trn:currency>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </trn:currency>
+  <trn:date-posted>
+    <ts:date>2018-04-15 03:59:00 -0700</ts:date>
+  </trn:date-posted>
+  <trn:date-entered>
+    <ts:date>2019-01-17 21:23:41 -0800</ts:date>
+  </trn:date-entered>
+  <trn:description>Miscellaneous expenses</trn:description>
+  <trn:slots>
+    <slot>
+      <slot:key>date-posted</slot:key>
+      <slot:value type="gdate">
+        <gdate>2018-04-15</gdate>
+      </slot:value>
+    </slot>
+    <slot>
+      <slot:key>notes</slot:key>
+      <slot:value type="string"></slot:value>
+    </slot>
+  </trn:slots>
+  <trn:splits>
+    <trn:split>
+      <split:id type="guid">eb87ff829df4495db38738ed7182b8e9</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>175000/100</split:value>
+      <split:quantity>175000/100</split:quantity>
+      <split:account type="guid">4d51f1cac11e40f7a09d62513a82855b</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">fd069425d56548f992c0c729c3935bb9</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>-175000/100</split:value>
+      <split:quantity>-175000/100</split:quantity>
+      <split:account type="guid">d15f38eda7894102984697722140f7db</split:account>
+    </trn:split>
+  </trn:splits>
+</gnc:transaction>
+<gnc:transaction version="2.0.0">
+  <trn:id type="guid">1728a00e61aa468caf587bf26369c7e3</trn:id>
+  <trn:currency>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </trn:currency>
+  <trn:date-posted>
+    <ts:date>2018-04-30 03:59:00 -0700</ts:date>
+  </trn:date-posted>
+  <trn:date-entered>
+    <ts:date>2019-01-17 21:23:01 -0800</ts:date>
+  </trn:date-entered>
+  <trn:description>Paycheck</trn:description>
+  <trn:slots>
+    <slot>
+      <slot:key>date-posted</slot:key>
+      <slot:value type="gdate">
+        <gdate>2018-04-30</gdate>
+      </slot:value>
+    </slot>
+    <slot>
+      <slot:key>notes</slot:key>
+      <slot:value type="string"></slot:value>
+    </slot>
+  </trn:slots>
+  <trn:splits>
+    <trn:split>
+      <split:id type="guid">5e25095236414a62b806e1c203bc4196</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>350000/100</split:value>
+      <split:quantity>350000/100</split:quantity>
+      <split:account type="guid">d15f38eda7894102984697722140f7db</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">1f6c66eefc93464eb189afd8b13a5ee9</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>100000/100</split:value>
+      <split:quantity>100000/100</split:quantity>
+      <split:account type="guid">7a09c8f210de469285a51133e023f63f</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">03a8cc94707d49a1ad4b05afc62f134e</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>-450000/100</split:value>
+      <split:quantity>-450000/100</split:quantity>
+      <split:account type="guid">8b126bebf21d4ade85c3ba6a01d60504</split:account>
+    </trn:split>
+  </trn:splits>
+</gnc:transaction>
+<gnc:transaction version="2.0.0">
+  <trn:id type="guid">70d1196bf2cb4e58ae230c7bf29ebec2</trn:id>
+  <trn:currency>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </trn:currency>
+  <trn:date-posted>
+    <ts:date>2018-05-15 03:59:00 -0700</ts:date>
+  </trn:date-posted>
+  <trn:date-entered>
+    <ts:date>2019-01-17 21:23:34 -0800</ts:date>
+  </trn:date-entered>
+  <trn:description>Miscellaneous expenses</trn:description>
+  <trn:slots>
+    <slot>
+      <slot:key>date-posted</slot:key>
+      <slot:value type="gdate">
+        <gdate>2018-05-15</gdate>
+      </slot:value>
+    </slot>
+    <slot>
+      <slot:key>notes</slot:key>
+      <slot:value type="string"></slot:value>
+    </slot>
+  </trn:slots>
+  <trn:splits>
+    <trn:split>
+      <split:id type="guid">5efd774ebdbd4114816b2ea629cab4e0</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>185000/100</split:value>
+      <split:quantity>185000/100</split:quantity>
+      <split:account type="guid">4d51f1cac11e40f7a09d62513a82855b</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">38fc3d44cd09467c90d59430efbf8219</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>-185000/100</split:value>
+      <split:quantity>-185000/100</split:quantity>
+      <split:account type="guid">d15f38eda7894102984697722140f7db</split:account>
+    </trn:split>
+  </trn:splits>
+</gnc:transaction>
+<gnc:transaction version="2.0.0">
+  <trn:id type="guid">b355afe3a4c3413d87a740efe5d352e8</trn:id>
+  <trn:currency>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </trn:currency>
+  <trn:date-posted>
+    <ts:date>2018-05-31 03:59:00 -0700</ts:date>
+  </trn:date-posted>
+  <trn:date-entered>
+    <ts:date>2019-01-17 21:22:46 -0800</ts:date>
+  </trn:date-entered>
+  <trn:description>Paycheck</trn:description>
+  <trn:slots>
+    <slot>
+      <slot:key>date-posted</slot:key>
+      <slot:value type="gdate">
+        <gdate>2018-05-31</gdate>
+      </slot:value>
+    </slot>
+    <slot>
+      <slot:key>notes</slot:key>
+      <slot:value type="string"></slot:value>
+    </slot>
+  </trn:slots>
+  <trn:splits>
+    <trn:split>
+      <split:id type="guid">24595270f21f4c278e9a9d077bc180ed</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>350000/100</split:value>
+      <split:quantity>350000/100</split:quantity>
+      <split:account type="guid">d15f38eda7894102984697722140f7db</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">3a3e8084c26347139b5df24109fcf311</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>100000/100</split:value>
+      <split:quantity>100000/100</split:quantity>
+      <split:account type="guid">7a09c8f210de469285a51133e023f63f</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">08111aef470f4bc08226fe3a2c5ed706</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>-450000/100</split:value>
+      <split:quantity>-450000/100</split:quantity>
+      <split:account type="guid">8b126bebf21d4ade85c3ba6a01d60504</split:account>
+    </trn:split>
+  </trn:splits>
+</gnc:transaction>
+<gnc:transaction version="2.0.0">
+  <trn:id type="guid">65135dd80bda46d2a135c2b2f7b6f9a1</trn:id>
+  <trn:currency>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </trn:currency>
+  <trn:date-posted>
+    <ts:date>2018-06-15 03:59:00 -0700</ts:date>
+  </trn:date-posted>
+  <trn:date-entered>
+    <ts:date>2019-01-17 21:23:28 -0800</ts:date>
+  </trn:date-entered>
+  <trn:description>Miscellaneous expenses</trn:description>
+  <trn:slots>
+    <slot>
+      <slot:key>date-posted</slot:key>
+      <slot:value type="gdate">
+        <gdate>2018-06-15</gdate>
+      </slot:value>
+    </slot>
+    <slot>
+      <slot:key>notes</slot:key>
+      <slot:value type="string"></slot:value>
+    </slot>
+  </trn:slots>
+  <trn:splits>
+    <trn:split>
+      <split:id type="guid">e193d7bb55fc4731bc69a9ff0ed5e41c</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>140000/100</split:value>
+      <split:quantity>140000/100</split:quantity>
+      <split:account type="guid">4d51f1cac11e40f7a09d62513a82855b</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">2c8c736fb7d84ac494a556fd17cb71bc</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>-140000/100</split:value>
+      <split:quantity>-140000/100</split:quantity>
+      <split:account type="guid">d15f38eda7894102984697722140f7db</split:account>
+    </trn:split>
+  </trn:splits>
+</gnc:transaction>
+<gnc:transaction version="2.0.0">
+  <trn:id type="guid">bf6bf33799a9418d8347e6e0b8fa741e</trn:id>
+  <trn:currency>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </trn:currency>
+  <trn:date-posted>
+    <ts:date>2018-06-28 03:59:00 -0700</ts:date>
+  </trn:date-posted>
+  <trn:date-entered>
+    <ts:date>2019-01-17 21:16:34 -0800</ts:date>
+  </trn:date-entered>
+  <trn:description>Paycheck</trn:description>
+  <trn:slots>
+    <slot>
+      <slot:key>date-posted</slot:key>
+      <slot:value type="gdate">
+        <gdate>2018-06-28</gdate>
+      </slot:value>
+    </slot>
+    <slot>
+      <slot:key>notes</slot:key>
+      <slot:value type="string"></slot:value>
+    </slot>
+  </trn:slots>
+  <trn:splits>
+    <trn:split>
+      <split:id type="guid">5a6b591c3bda4f19acb909dca3aa46f4</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>350000/100</split:value>
+      <split:quantity>350000/100</split:quantity>
+      <split:account type="guid">d15f38eda7894102984697722140f7db</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">60e587e8f1c8427db2f9d0b73cb6bc52</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>100000/100</split:value>
+      <split:quantity>100000/100</split:quantity>
+      <split:account type="guid">7a09c8f210de469285a51133e023f63f</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">57594f97b32b4cfcaabf7f012ed24a7d</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>-450000/100</split:value>
+      <split:quantity>-450000/100</split:quantity>
+      <split:account type="guid">8b126bebf21d4ade85c3ba6a01d60504</split:account>
+    </trn:split>
+  </trn:splits>
+</gnc:transaction>
+<gnc:transaction version="2.0.0">
+  <trn:id type="guid">70f1b567e7e94c74a8b3463d9399c2d6</trn:id>
+  <trn:currency>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </trn:currency>
+  <trn:date-posted>
+    <ts:date>2018-07-15 03:59:00 -0700</ts:date>
+  </trn:date-posted>
+  <trn:date-entered>
+    <ts:date>2019-01-17 21:17:31 -0800</ts:date>
+  </trn:date-entered>
+  <trn:description>Miscellaneous expenses</trn:description>
+  <trn:slots>
+    <slot>
+      <slot:key>date-posted</slot:key>
+      <slot:value type="gdate">
+        <gdate>2018-07-15</gdate>
+      </slot:value>
+    </slot>
+    <slot>
+      <slot:key>notes</slot:key>
+      <slot:value type="string"></slot:value>
+    </slot>
+  </trn:slots>
+  <trn:splits>
+    <trn:split>
+      <split:id type="guid">b90ddc0cdc174c0caca449d18f4683ec</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>160000/100</split:value>
+      <split:quantity>160000/100</split:quantity>
+      <split:account type="guid">4d51f1cac11e40f7a09d62513a82855b</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">655ea305dc8e4ff1852d372adfa3469b</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>-160000/100</split:value>
+      <split:quantity>-160000/100</split:quantity>
+      <split:account type="guid">d15f38eda7894102984697722140f7db</split:account>
+    </trn:split>
+  </trn:splits>
+</gnc:transaction>
+<gnc:transaction version="2.0.0">
+  <trn:id type="guid">d2d4312e8ebf40e183c06295fed352c2</trn:id>
+  <trn:currency>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </trn:currency>
+  <trn:date-posted>
+    <ts:date>2018-07-31 03:59:00 -0700</ts:date>
+  </trn:date-posted>
+  <trn:date-entered>
+    <ts:date>2019-01-17 21:16:22 -0800</ts:date>
+  </trn:date-entered>
+  <trn:description>Paycheck</trn:description>
+  <trn:slots>
+    <slot>
+      <slot:key>date-posted</slot:key>
+      <slot:value type="gdate">
+        <gdate>2018-07-31</gdate>
+      </slot:value>
+    </slot>
+    <slot>
+      <slot:key>notes</slot:key>
+      <slot:value type="string"></slot:value>
+    </slot>
+  </trn:slots>
+  <trn:splits>
+    <trn:split>
+      <split:id type="guid">575911ce94de42aa94081f26d14ecfb1</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>350000/100</split:value>
+      <split:quantity>350000/100</split:quantity>
+      <split:account type="guid">d15f38eda7894102984697722140f7db</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">aa0a193b9e9f441eb8b26fb19f3701c4</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>100000/100</split:value>
+      <split:quantity>100000/100</split:quantity>
+      <split:account type="guid">7a09c8f210de469285a51133e023f63f</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">caa67cf265a247169cabeb8fe7ebfb86</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>-450000/100</split:value>
+      <split:quantity>-450000/100</split:quantity>
+      <split:account type="guid">8b126bebf21d4ade85c3ba6a01d60504</split:account>
+    </trn:split>
+  </trn:splits>
+</gnc:transaction>
+<gnc:transaction version="2.0.0">
+  <trn:id type="guid">078efb55c6f74691b284607c21db9b31</trn:id>
+  <trn:currency>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </trn:currency>
+  <trn:date-posted>
+    <ts:date>2018-08-15 03:59:00 -0700</ts:date>
+  </trn:date-posted>
+  <trn:date-entered>
+    <ts:date>2019-01-17 21:17:17 -0800</ts:date>
+  </trn:date-entered>
+  <trn:description>Miscellaneous expenses</trn:description>
+  <trn:slots>
+    <slot>
+      <slot:key>date-posted</slot:key>
+      <slot:value type="gdate">
+        <gdate>2018-08-15</gdate>
+      </slot:value>
+    </slot>
+    <slot>
+      <slot:key>notes</slot:key>
+      <slot:value type="string"></slot:value>
+    </slot>
+  </trn:slots>
+  <trn:splits>
+    <trn:split>
+      <split:id type="guid">93cbd857325e4895b78ef069e444622f</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>215000/100</split:value>
+      <split:quantity>215000/100</split:quantity>
+      <split:account type="guid">4d51f1cac11e40f7a09d62513a82855b</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">98fb729d490847838e32c6b165c3f93d</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>-215000/100</split:value>
+      <split:quantity>-215000/100</split:quantity>
+      <split:account type="guid">d15f38eda7894102984697722140f7db</split:account>
+    </trn:split>
+  </trn:splits>
+</gnc:transaction>
+<gnc:transaction version="2.0.0">
+  <trn:id type="guid">ccd6d46e392042d2815a4519d71d8119</trn:id>
+  <trn:currency>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </trn:currency>
+  <trn:date-posted>
+    <ts:date>2018-09-15 03:59:00 -0700</ts:date>
+  </trn:date-posted>
+  <trn:date-entered>
+    <ts:date>2019-01-17 21:17:02 -0800</ts:date>
+  </trn:date-entered>
+  <trn:description>Miscellaneous expenses</trn:description>
+  <trn:slots>
+    <slot>
+      <slot:key>date-posted</slot:key>
+      <slot:value type="gdate">
+        <gdate>2018-09-15</gdate>
+      </slot:value>
+    </slot>
+    <slot>
+      <slot:key>notes</slot:key>
+      <slot:value type="string"></slot:value>
+    </slot>
+  </trn:slots>
+  <trn:splits>
+    <trn:split>
+      <split:id type="guid">b949e67b54cd4a41940f75cbcae8a8a3</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>130000/100</split:value>
+      <split:quantity>130000/100</split:quantity>
+      <split:account type="guid">4d51f1cac11e40f7a09d62513a82855b</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">5d45cf3f473a4ef6af99aebafbfa671f</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>-130000/100</split:value>
+      <split:quantity>-130000/100</split:quantity>
+      <split:account type="guid">d15f38eda7894102984697722140f7db</split:account>
+    </trn:split>
+  </trn:splits>
+</gnc:transaction>
+<gnc:transaction version="2.0.0">
+  <trn:id type="guid">6d23c5e80c1c4ab0a8149be033a0fa75</trn:id>
+  <trn:currency>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </trn:currency>
+  <trn:date-posted>
+    <ts:date>2018-10-15 03:59:00 -0700</ts:date>
+  </trn:date-posted>
+  <trn:date-entered>
+    <ts:date>2019-01-17 21:13:39 -0800</ts:date>
+  </trn:date-entered>
+  <trn:description>Miscellaneous expenses</trn:description>
+  <trn:slots>
+    <slot>
+      <slot:key>date-posted</slot:key>
+      <slot:value type="gdate">
+        <gdate>2018-10-15</gdate>
+      </slot:value>
+    </slot>
+    <slot>
+      <slot:key>notes</slot:key>
+      <slot:value type="string"></slot:value>
+    </slot>
+  </trn:slots>
+  <trn:splits>
+    <trn:split>
+      <split:id type="guid">eee5c82d4693439e9bcd6e56d514702c</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>115000/100</split:value>
+      <split:quantity>115000/100</split:quantity>
+      <split:account type="guid">4d51f1cac11e40f7a09d62513a82855b</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">2c4fe7b36a6d43b79c269f59a512d9ad</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>-115000/100</split:value>
+      <split:quantity>-115000/100</split:quantity>
+      <split:account type="guid">d15f38eda7894102984697722140f7db</split:account>
+    </trn:split>
+  </trn:splits>
+</gnc:transaction>
+<gnc:transaction version="2.0.0">
+  <trn:id type="guid">0dbefc6f185348879eae2274179fe634</trn:id>
+  <trn:currency>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </trn:currency>
+  <trn:date-posted>
+    <ts:date>2018-11-15 02:59:00 -0800</ts:date>
+  </trn:date-posted>
+  <trn:date-entered>
+    <ts:date>2019-01-17 20:23:04 -0800</ts:date>
+  </trn:date-entered>
+  <trn:description>Miscellaneous expenses</trn:description>
+  <trn:slots>
+    <slot>
+      <slot:key>date-posted</slot:key>
+      <slot:value type="gdate">
+        <gdate>2018-11-15</gdate>
+      </slot:value>
+    </slot>
+  </trn:slots>
+  <trn:splits>
+    <trn:split>
+      <split:id type="guid">bde7f76b6db44e00af7ed36b579c6a60</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>155000/100</split:value>
+      <split:quantity>155000/100</split:quantity>
+      <split:account type="guid">4d51f1cac11e40f7a09d62513a82855b</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">2e535bb23d4241b48ed8e30fb6f79ad9</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>-155000/100</split:value>
+      <split:quantity>-155000/100</split:quantity>
+      <split:account type="guid">d15f38eda7894102984697722140f7db</split:account>
+    </trn:split>
+  </trn:splits>
+</gnc:transaction>
+<gnc:transaction version="2.0.0">
+  <trn:id type="guid">cd98d93b502640a7b895bac014eb17c6</trn:id>
+  <trn:currency>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </trn:currency>
+  <trn:date-posted>
+    <ts:date>2018-12-15 02:59:00 -0800</ts:date>
+  </trn:date-posted>
+  <trn:date-entered>
+    <ts:date>2019-01-17 20:23:12 -0800</ts:date>
+  </trn:date-entered>
+  <trn:description>Miscellaneous expenses</trn:description>
+  <trn:slots>
+    <slot>
+      <slot:key>date-posted</slot:key>
+      <slot:value type="gdate">
+        <gdate>2018-12-15</gdate>
+      </slot:value>
+    </slot>
+    <slot>
+      <slot:key>notes</slot:key>
+      <slot:value type="string"></slot:value>
+    </slot>
+  </trn:slots>
+  <trn:splits>
+    <trn:split>
+      <split:id type="guid">5e084391a3804b2a9dd7931ba9fd5134</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>165000/100</split:value>
+      <split:quantity>165000/100</split:quantity>
+      <split:account type="guid">4d51f1cac11e40f7a09d62513a82855b</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">499a2866dc7b4d9db809453b04c5c490</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>-165000/100</split:value>
+      <split:quantity>-165000/100</split:quantity>
+      <split:account type="guid">d15f38eda7894102984697722140f7db</split:account>
+    </trn:split>
+  </trn:splits>
+</gnc:transaction>
+<gnc:transaction version="2.0.0">
+  <trn:id type="guid">1971900cc7b24ff1b6d815be4682246e</trn:id>
+  <trn:currency>
+    <cmdty:space>CURRENCY</cmdty:space>
+    <cmdty:id>USD</cmdty:id>
+  </trn:currency>
+  <trn:date-posted>
+    <ts:date>2019-01-15 02:59:00 -0800</ts:date>
+  </trn:date-posted>
+  <trn:date-entered>
+    <ts:date>2019-01-17 20:23:21 -0800</ts:date>
+  </trn:date-entered>
+  <trn:description>Miscellaneous expenses</trn:description>
+  <trn:slots>
+    <slot>
+      <slot:key>date-posted</slot:key>
+      <slot:value type="gdate">
+        <gdate>2019-01-15</gdate>
+      </slot:value>
+    </slot>
+    <slot>
+      <slot:key>notes</slot:key>
+      <slot:value type="string"></slot:value>
+    </slot>
+  </trn:slots>
+  <trn:splits>
+    <trn:split>
+      <split:id type="guid">6d01d1f220964c31a91903bd2b5171c9</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>145000/100</split:value>
+      <split:quantity>145000/100</split:quantity>
+      <split:account type="guid">4d51f1cac11e40f7a09d62513a82855b</split:account>
+    </trn:split>
+    <trn:split>
+      <split:id type="guid">919eb29ed68c43a5b59152364d048721</split:id>
+      <split:reconciled-state>n</split:reconciled-state>
+      <split:value>-145000/100</split:value>
+      <split:quantity>-145000/100</split:quantity>
+      <split:account type="guid">d15f38eda7894102984697722140f7db</split:account>
+    </trn:split>
+  </trn:splits>
+</gnc:transaction>
+</gnc:book>
+</gnc-v2>
+
+<!-- Local variables: -->
+<!-- mode: xml        -->
+<!-- End:             -->
