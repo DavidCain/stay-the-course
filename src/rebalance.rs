@@ -3,7 +3,7 @@ extern crate rust_decimal;
 use self::rust_decimal::Decimal;
 use assets::{Asset, AssetClass};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct AssetAllocation {
     pub asset_class: AssetClass,
     pub target_ratio: Decimal,
@@ -11,18 +11,8 @@ pub struct AssetAllocation {
     future_contribution: Decimal,
 }
 
-pub fn ideal_allocations() -> Vec<AssetAllocation> {
-    // TODO: Calculate based off my age, current date
-    vec![
-        AssetAllocation::new(AssetClass::USBonds, Decimal::new(82, 3)),
-        AssetAllocation::new(AssetClass::USStocks, Decimal::new(459, 3)),
-        AssetAllocation::new(AssetClass::InternationalStocks, Decimal::new(367, 3)),
-        AssetAllocation::new(AssetClass::REIT, Decimal::new(92, 3)),
-    ]
-}
-
 impl AssetAllocation {
-    fn new(asset_class: AssetClass, target_ratio: Decimal) -> AssetAllocation {
+    pub fn new(asset_class: AssetClass, target_ratio: Decimal) -> AssetAllocation {
         let underlying_assets = Vec::new();
         let future_contribution = 0.into();
 
@@ -50,7 +40,7 @@ impl AssetAllocation {
 
     pub fn add_asset(&mut self, asset: Asset) {
         if asset.asset_class != self.asset_class {
-            panic!("Asset types do not match!");
+            panic!("Asset types must match");
         }
         self.underlying_assets.push(asset)
     }
@@ -63,7 +53,7 @@ impl AssetAllocation {
         // Identify the percentage of total holdings that this asset will hold
         // (Assesses current value, pending contributions over the eventual total portfolio value)
         let actual = self.percent_holdings(new_total);
-        (actual / self.target_ratio) - Decimal::new(1, 0)
+        (actual / self.target_ratio) - Decimal::from(1)
     }
 }
 
@@ -124,9 +114,9 @@ impl Portfolio {
             );
             println!(
                 "   {:.2}% -> {:.2}% (target: {:.2}%)",
-                start_ratio * Decimal::new(100, 0),
-                asset.percent_holdings(new_total) * Decimal::new(100, 0),
-                asset.target_ratio * Decimal::new(100, 0),
+                start_ratio * Decimal::from(100),
+                asset.percent_holdings(new_total) * Decimal::from(100),
+                asset.target_ratio * Decimal::from(100),
             );
         }
     }
@@ -270,21 +260,78 @@ pub fn optimally_allocate(mut portfolio: Portfolio, contribution: Decimal) -> Po
     portfolio
 }
 
-#[test]
-fn test_adds_to_1() {
-    let terrible_allocation = AssetAllocation::new(AssetClass::Cash, 1.into());
-    let portfolio = Portfolio::new(vec![terrible_allocation]);
-    optimally_allocate(portfolio, 1_000.into());
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-#[test]
-#[should_panic(expected = "Cannot rebalance unless total is 100%")]
-fn test_ratios_do_not_sum() {
-    let does_not_sum = vec![
-        AssetAllocation::new(AssetClass::USStocks, Decimal::new(3, 1)),
-        AssetAllocation::new(AssetClass::USBonds, Decimal::new(3, 1)),
-    ];
-    let portfolio = Portfolio::new(does_not_sum);
+    #[test]
+    #[should_panic(expected = "Asset types must match")]
+    fn test_asset_types_must_match() {
+        let mut stocks = AssetAllocation::new(AssetClass::USStocks, 1.into());
 
-    optimally_allocate(portfolio, 1_000.into());
+        stocks.add_asset(Asset {
+            asset_class: AssetClass::IntlBonds,
+            name: String::from("VTABX"),
+            value: Decimal::from(1234),
+        });
+    }
+
+    #[test]
+    fn test_current_value_is_summed_assets() {
+        let mut stocks = AssetAllocation::new(AssetClass::USStocks, 1.into());
+        assert_eq!(stocks.current_value(), 0.into());
+
+        stocks.add_asset(Asset {
+            asset_class: AssetClass::USStocks,
+            name: String::from("VTSAX"),
+            value: Decimal::from(8675),
+        });
+
+        assert_eq!(stocks.current_value(), Decimal::from(8675));
+
+        stocks.add_asset(Asset {
+            asset_class: AssetClass::USStocks,
+            name: String::from("FZROX"),
+            value: Decimal::from(10000),
+        });
+
+        assert_eq!(stocks.current_value(), Decimal::from(18675));
+    }
+    #[test]
+    fn test_add_contribution() {
+        let mut bonds = AssetAllocation::new(AssetClass::USBonds, 1.into());
+
+        // Object starts with no known assets, no future contribution
+        assert_eq!(bonds.current_value(), 0.into());
+        assert_eq!(bonds.future_value(), 0.into());
+
+        // We add $37.20 as a future contribution
+        bonds.add_contribution(Decimal::new(3720, 2));
+        assert_eq!(bonds.current_value(), 0.into());
+        assert_eq!(bonds.future_value(), Decimal::new(3720, 2));
+
+        // We add another future contribution ($14.67)
+        bonds.add_contribution(Decimal::new(1467, 2));
+        assert_eq!(bonds.current_value(), 0.into());
+        assert_eq!(bonds.future_value(), Decimal::new(5187, 2));
+    }
+
+    #[test]
+    fn test_allocations_sum_to_1() {
+        let terrible_allocation = AssetAllocation::new(AssetClass::Cash, 1.into());
+        let portfolio = Portfolio::new(vec![terrible_allocation]);
+        optimally_allocate(portfolio, 1_000.into());
+    }
+
+    #[test]
+    #[should_panic(expected = "Cannot rebalance unless total is 100%")]
+    fn test_allocations_do_not_sum() {
+        let does_not_sum = vec![
+            AssetAllocation::new(AssetClass::USStocks, Decimal::new(3, 1)),
+            AssetAllocation::new(AssetClass::USBonds, Decimal::new(3, 1)),
+        ];
+        let portfolio = Portfolio::new(does_not_sum);
+
+        optimally_allocate(portfolio, 1_000.into());
+    }
 }

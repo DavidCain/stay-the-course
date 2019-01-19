@@ -109,14 +109,12 @@ investor plains to perform [tax loss harvesting][tax_loss_harvesting].
 ## Major tasks outstanding
 This project is very much a work in progress. Some key outstanding tasks:
 
-- [ ] Write some real tests
 - [ ] Automated build support
 - [ ] Fix XML format parsing (only SQLite works at present)
 - [ ] Optimize XML parsing (currently takes a couple seconds on a 20MB file)
 - [ ] Command line interface
 - [ ] Use a CSV (default included, but support user-provided) that maps ticker
       names to asset classes
-- [ ] Allow users to input their preferred asset allocation strategy (a sample one is included)
 - [ ] Warn when the last known price for a security is too old
 
 ## External resources

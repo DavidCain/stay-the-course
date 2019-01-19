@@ -1,8 +1,11 @@
+extern crate chrono;
 extern crate rust_decimal;
 
+use self::chrono::NaiveDate;
 use self::rust_decimal::Decimal;
 use std::io;
 
+mod allocation;
 mod assets;
 mod gnucash;
 mod rebalance;
@@ -26,7 +29,9 @@ fn main() {
     //let book = Book::from_xml_file("example.gnucash");
 
     // Identify our ideal allocations (percentages by asset class, summing to 100%)
-    let ideal_allocations = rebalance::ideal_allocations();
+    let birthday = NaiveDate::from_ymd(1960, 1, 1);
+    let bond_allocation = allocation::bond_allocation(birthday, 120);
+    let ideal_allocations = allocation::core_four(bond_allocation);
 
     let portfolio = book.portfolio_status(ideal_allocations);
 

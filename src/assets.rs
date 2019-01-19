@@ -2,7 +2,7 @@ extern crate rust_decimal;
 
 use self::rust_decimal::Decimal;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Asset {
     pub asset_class: AssetClass,
     pub name: String,
@@ -13,8 +13,8 @@ pub struct Asset {
 pub enum AssetClass {
     USBonds,
     USStocks,
-    InternationalBonds,
-    InternationalStocks,
+    IntlBonds,
+    IntlStocks,
     REIT,
     Target,
     Cash,
@@ -25,8 +25,8 @@ pub fn classify(fund_name: &str) -> AssetClass {
         "VTSAX" => AssetClass::USStocks,
         "VFIAX" => AssetClass::USStocks,
         "FZROX" => AssetClass::USStocks,
-        "FZILX" => AssetClass::InternationalStocks,
-        "VTIAX" => AssetClass::InternationalStocks,
+        "FZILX" => AssetClass::IntlStocks,
+        "VTIAX" => AssetClass::IntlStocks,
         "VBTLX" => AssetClass::USBonds,
         "VGSLX" => AssetClass::REIT,
         "FZFXX" => AssetClass::Cash,   // Fidelity core position
