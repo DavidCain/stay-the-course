@@ -164,7 +164,9 @@ impl Commodity {
             _ => false,
         }
     }
+}
 
+impl GnucashFromXML for Commodity {
     fn from_xml(reader: &mut Reader<BufReader<File>>) -> Commodity {
         let mut buf = Vec::new();
 
@@ -222,7 +224,7 @@ struct Split {
     account: String, // guid
 }
 
-impl Split {
+impl GnucashFromXML for Split {
     fn from_xml(reader: &mut Reader<BufReader<File>>) -> Split {
         let mut buf = Vec::new();
 
@@ -299,6 +301,38 @@ impl Transaction {
         splits
     }
 
+    fn parse_date_posted(reader: &mut Reader<BufReader<File>>) -> DateTime<FixedOffset> {
+        let mut buf = Vec::new();
+
+        let mut found_ts = None;
+        loop {
+            match reader.read_event(&mut buf) {
+                Ok(Event::Start(ref e)) => match e.name() {
+                    b"ts:date" => {
+                        let text = reader.read_text(e.name(), &mut Vec::new()).unwrap();
+                        found_ts =
+                            Some(DateTime::parse_from_str(&text, GNUCASH_DT_FORMAT).unwrap());
+                    }
+                    _ => panic!("Unexpected tag in list of splits"),
+                },
+                Ok(Event::End(ref e)) => match e.name() {
+                    b"trn:date-posted" => break,
+                    _ => (),
+                },
+                Ok(Event::Eof) => panic!("Unexpected EOF before closing date-posted tag!"),
+                Err(e) => panic!("Error at position {}: {:?}", reader.buffer_position(), e),
+                _ => (), // There are several other `Event`s we do not consider here
+            }
+            buf.clear();
+        }
+        match found_ts {
+            Some(ts) => ts,
+            None => panic!("No timestamp found"),
+        }
+    }
+}
+
+impl GnucashFromXML for Transaction {
     fn from_xml(reader: &mut Reader<BufReader<File>>) -> Transaction {
         let mut buf = Vec::new();
 
@@ -343,36 +377,6 @@ impl Transaction {
             (Some(_), None) => panic!("Found a transaction with no date posted"),
             (None, Some(_)) => panic!("Found a transaction with no splits"),
             (None, None) => panic!("Found a transaction without splits or a date posted"),
-        }
-    }
-
-    fn parse_date_posted(reader: &mut Reader<BufReader<File>>) -> DateTime<FixedOffset> {
-        let mut buf = Vec::new();
-
-        let mut found_ts = None;
-        loop {
-            match reader.read_event(&mut buf) {
-                Ok(Event::Start(ref e)) => match e.name() {
-                    b"ts:date" => {
-                        let text = reader.read_text(e.name(), &mut Vec::new()).unwrap();
-                        found_ts =
-                            Some(DateTime::parse_from_str(&text, GNUCASH_DT_FORMAT).unwrap());
-                    }
-                    _ => panic!("Unexpected tag in list of splits"),
-                },
-                Ok(Event::End(ref e)) => match e.name() {
-                    b"trn:date-posted" => break,
-                    _ => (),
-                },
-                Ok(Event::Eof) => panic!("Unexpected EOF before closing date-posted tag!"),
-                Err(e) => panic!("Error at position {}: {:?}", reader.buffer_position(), e),
-                _ => (), // There are several other `Event`s we do not consider here
-            }
-            buf.clear();
-        }
-        match found_ts {
-            Some(ts) => ts,
-            None => panic!("No timestamp found"),
         }
     }
 }
@@ -421,7 +425,9 @@ impl Account {
         }
         self.current_quantity() * last_known_price.value
     }
+}
 
+impl GnucashFromXML for Account {
     fn from_xml(mut reader: &mut Reader<BufReader<File>>) -> Account {
         let mut buf = Vec::new();
 
