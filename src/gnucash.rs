@@ -219,32 +219,48 @@ impl GnucashFromXML for Commodity {
 
 #[derive(Debug)]
 struct Split {
-    value: Decimal,
-    quantity: Decimal,
+    // Parsing value & quantity into Decimal is expensive.
+    // Don't bother if we don't need to.
+    value_fraction: Result<String, quick_xml::Error>,
+    quantity_fraction: Result<String, quick_xml::Error>,
     account: String, // guid
+}
+
+impl Split {
+    pub fn quantity(&self) -> Decimal {
+        match &self.quantity_fraction {
+            Ok(frac) => to_quantity(&frac),
+            Err(_) => panic!("Error parsing quantity"),
+        }
+    }
+
+    pub fn value(&self) -> Decimal {
+        match &self.value_fraction {
+            Ok(frac) => to_quantity(&frac),
+            Err(_) => panic!("Error parsing value"),
+        }
+    }
 }
 
 impl GnucashFromXML for Split {
     fn from_xml(reader: &mut Reader<BufReader<File>>) -> Split {
         let mut buf = Vec::new();
 
-        let mut value: Decimal = 0.into();
-        let mut quantity: Decimal = 0.into();
-        let mut account: String = String::from("");
+        let mut value_fraction = None;
+        let mut quantity_fraction = None;
+        let mut account = None;
 
         loop {
             match reader.read_event(&mut buf) {
                 Ok(Event::Start(ref e)) => match e.name() {
                     b"split:value" => {
-                        let frac = reader.read_text(e.name(), &mut Vec::new()).unwrap();
-                        value = to_quantity(&frac);
+                        value_fraction = Some(reader.read_text(e.name(), &mut Vec::new()));
                     }
                     b"split:quantity" => {
-                        let frac = reader.read_text(e.name(), &mut Vec::new()).unwrap();
-                        quantity = to_quantity(&frac);
+                        quantity_fraction = Some(reader.read_text(e.name(), &mut Vec::new()));
                     }
                     b"split:account" => {
-                        account = reader.read_text(e.name(), &mut Vec::new()).unwrap();
+                        account = Some(reader.read_text(e.name(), &mut Vec::new()).unwrap());
                     }
                     _ => (),
                 },
@@ -258,10 +274,13 @@ impl GnucashFromXML for Split {
             buf.clear();
         }
 
-        Split {
-            value,
-            quantity,
-            account,
+        match (value_fraction, quantity_fraction, account) {
+            (Some(value_fraction), Some(quantity_fraction), Some(account)) => Split {
+                value_fraction,
+                quantity_fraction,
+                account,
+            },
+            (_, _, _) => panic!("Must have value, quantity, and account in a split"),
         }
     }
 }
@@ -269,11 +288,15 @@ impl GnucashFromXML for Split {
 #[derive(Debug)]
 struct Transaction {
     name: String,
-    date_posted: DateTime<FixedOffset>,
+    date_posted_string: String,
     splits: Vec<Split>,
 }
 
 impl Transaction {
+    fn date_posted(&self) -> DateTime<FixedOffset> {
+        DateTime::parse_from_str(&self.date_posted_string, GNUCASH_DT_FORMAT).unwrap()
+    }
+
     fn parse_splits(reader: &mut Reader<BufReader<File>>) -> Vec<Split> {
         let mut splits: Vec<Split> = Vec::new();
 
@@ -301,7 +324,7 @@ impl Transaction {
         splits
     }
 
-    fn parse_date_posted(reader: &mut Reader<BufReader<File>>) -> DateTime<FixedOffset> {
+    fn parse_date_posted(reader: &mut Reader<BufReader<File>>) -> String {
         let mut buf = Vec::new();
 
         let mut found_ts = None;
@@ -309,9 +332,7 @@ impl Transaction {
             match reader.read_event(&mut buf) {
                 Ok(Event::Start(ref e)) => match e.name() {
                     b"ts:date" => {
-                        let text = reader.read_text(e.name(), &mut Vec::new()).unwrap();
-                        found_ts =
-                            Some(DateTime::parse_from_str(&text, GNUCASH_DT_FORMAT).unwrap());
+                        found_ts = Some(reader.read_text(e.name(), &mut Vec::new()).unwrap());
                     }
                     _ => panic!("Unexpected tag in list of splits"),
                 },
@@ -338,14 +359,14 @@ impl GnucashFromXML for Transaction {
 
         let mut name: String = String::from("");
         let mut parsed_splits = None;
-        let mut parsed_date_posted = None;
+        let mut date_posted = None;
 
         loop {
             match reader.read_event(&mut buf) {
                 // Stop at the top of all top-level tags that have content we care about
                 Ok(Event::Start(ref e)) => match e.name() {
                     b"trn:date-posted" => {
-                        parsed_date_posted = Some(Transaction::parse_date_posted(reader));
+                        date_posted = Some(Transaction::parse_date_posted(reader));
                     }
                     b"trn:name" => {
                         name = reader.read_text(e.name(), &mut Vec::new()).unwrap();
@@ -368,10 +389,10 @@ impl GnucashFromXML for Transaction {
             }
             buf.clear();
         }
-        match (parsed_splits, parsed_date_posted) {
-            (Some(splits), Some(date_posted)) => Transaction {
+        match (parsed_splits, date_posted) {
+            (Some(splits), Some(date_posted_string)) => Transaction {
                 name,
-                date_posted,
+                date_posted_string,
                 splits,
             },
             (Some(_), None) => panic!("Found a transaction with no date posted"),
@@ -409,7 +430,7 @@ impl Account {
         // std::iter::Sum<d128> isn't implemented. =(
         let mut total = 0.into();
         for split in self.splits.iter() {
-            total += split.quantity;
+            total += split.quantity();
         }
         total
     }
