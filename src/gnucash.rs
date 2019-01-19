@@ -30,7 +30,10 @@ struct Price {
 
 impl Price {
     fn is_in_usd(&self) -> bool {
-        (self.to_commodity.space == "CURRENCY" && self.to_commodity.id == "USD")
+        match &self.to_commodity.space {
+            Some(space) => space == "CURRENCY" && self.to_commodity.id == "USD",
+            None => false
+        }
     }
 
     fn commodity_name(&self) -> &str {
@@ -152,14 +155,17 @@ impl PriceDatabase {
 
 #[derive(Debug)]
 struct Commodity {
-    space: String, // "FUND", "CURRENCY", etc.
+    space: Option<String>, // "FUND", "CURRENCY", etc.
     id: String,    // "VTSAX
     name: String,  // "Vanguard Total Stock Market Index Fund"
 }
 
 impl Commodity {
     fn is_investment(&self) -> bool {
-        return self.space == "FUND";
+        match &self.space  {
+            Some(space) => space == "FUND",
+            None => false,
+        }
     }
 }
 
@@ -167,22 +173,22 @@ impl GnucashFromXML for Commodity {
     fn from_xml(reader: &mut Reader<BufReader<File>>) -> Commodity {
         let mut buf = Vec::new();
 
-        let mut space: String = String::from("");
-        let mut id: String = String::from("");
-        let mut name: String = String::from("");
+        let mut space = None;
+        let mut id = None;
+        let mut name = None;
 
         loop {
             match reader.read_event(&mut buf) {
                 // Stop at the top of all top-level tags that have content we care about
                 Ok(Event::Start(ref e)) => match e.name() {
                     b"cmdty:space" => {
-                        space = reader.read_text(e.name(), &mut Vec::new()).unwrap();
+                        space = Some(reader.read_text(e.name(), &mut Vec::new()).unwrap());
                     }
                     b"cmdty:id" => {
-                        id = reader.read_text(e.name(), &mut Vec::new()).unwrap();
+                        id = Some(reader.read_text(e.name(), &mut Vec::new()).unwrap());
                     }
                     b"cmdty:name" => {
-                        name = reader.read_text(e.name(), &mut Vec::new()).unwrap();
+                        name = Some(reader.read_text(e.name(), &mut Vec::new()).unwrap());
                     }
                     _ => (),
                 },
@@ -202,14 +208,20 @@ impl GnucashFromXML for Commodity {
             }
             buf.clear();
         }
-        Commodity {
-            space,
-            // Name can be missing. Fall back to an ID if we lack a name
-            name: match name.is_empty() {
-                true => id.clone(),
-                false => name,
+
+        match id {
+            Some(id) => Commodity {
+                space,
+                // Name can be missing. Fall back to an ID if we lack a name
+                name: match name {
+                    Some(commodity_name) => commodity_name,
+                    None => id.clone(),
+                },
+                id,
             },
-            id,
+            _ => {
+                panic!("Commodities must have an ID!")
+            }
         }
     }
 }
