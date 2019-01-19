@@ -159,10 +159,7 @@ struct Commodity {
 
 impl Commodity {
     fn is_investment(&self) -> bool {
-        match self.space.as_ref() {
-            "FUND" => true,
-            _ => false,
-        }
+        return self.space == "FUND";
     }
 }
 
