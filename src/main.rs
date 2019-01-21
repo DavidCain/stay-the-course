@@ -22,7 +22,8 @@ fn get_contribution() -> Decimal {
 
 fn main() {
     println!("Parsing Gnucash datafile...");
-    let book = Book::from_file("example.gnucash");
+    let book = Book::from_sqlite_file("example.sqlite3");
+    //let book = Book::from_xml_file("example.gnucash");
 
     // Identify our ideal allocations (percentages by asset class, summing to 100%)
     let ideal_allocations = rebalance::ideal_allocations();

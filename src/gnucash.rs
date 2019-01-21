@@ -1,10 +1,12 @@
 extern crate chrono;
 extern crate quick_xml;
+extern crate rusqlite;
 extern crate rust_decimal;
 
-use self::chrono::{DateTime, FixedOffset};
+use self::chrono::{DateTime, Local, NaiveDateTime, Utc};
 use self::quick_xml::events::Event;
 use self::quick_xml::Reader;
+use self::rusqlite::{Connection, NO_PARAMS};
 use self::rust_decimal::Decimal;
 use std::collections::HashMap;
 use std::convert::Into;
@@ -16,9 +18,27 @@ use assets;
 use rebalance::{AssetAllocation, Portfolio};
 
 static GNUCASH_DT_FORMAT: &str = "%Y-%m-%d %H:%M:%S %z";
+static GNUCASH_UTC_DT_FORMAT: &str = "%Y-%m-%d %H:%M:%S";
+
+// In XML, datetimes are given with local TZ in them
+fn to_datetime(datestring: &str) -> DateTime<Local> {
+    let dt = DateTime::parse_from_str(datestring, GNUCASH_DT_FORMAT).unwrap();
+    dt.with_timezone(&Local)
+}
+
+// In SQLite, all datetimes are UTC
+fn utc_to_datetime(datestring: &str) -> DateTime<Local> {
+    let dt = NaiveDateTime::parse_from_str(datestring, GNUCASH_UTC_DT_FORMAT).unwrap();
+    let utc = DateTime::<Utc>::from_utc(dt, Utc);
+    utc.with_timezone(&Local)
+}
 
 trait GnucashFromXML {
     fn from_xml(&mut Reader<BufReader<File>>) -> Self;
+}
+
+trait GnucashFromSqlite {
+    fn from_sqlite(&Connection) -> Self;
 }
 
 #[derive(Debug)]
@@ -26,14 +46,14 @@ struct Price {
     from_commodity: Commodity,
     to_commodity: Commodity,
     value: Decimal,
-    time: DateTime<FixedOffset>,
+    time: DateTime<Local>,
 }
 
 impl Price {
     fn is_in_usd(&self) -> bool {
         match &self.to_commodity.space {
             Some(space) => space == "CURRENCY" && self.to_commodity.id == "USD",
-            None => false
+            None => false,
         }
     }
 
@@ -62,12 +82,11 @@ impl GnucashFromXML for Price {
                     }
                     b"ts:date" => {
                         let text = reader.read_text(e.name(), &mut Vec::new()).unwrap();
-                        found_ts =
-                            Some(DateTime::parse_from_str(&text, GNUCASH_DT_FORMAT).unwrap());
+                        found_ts = Some(to_datetime(&text));
                     }
                     b"price:value" => {
                         let frac = reader.read_text(e.name(), &mut Vec::new()).unwrap();
-                        value = to_quantity(&frac);
+                        value = frac_to_quantity(&frac);
                     }
                     _ => (),
                 },
@@ -124,6 +143,51 @@ impl PriceDatabase {
         match &account.commodity {
             Some(commodity) => self.last_price_by_commodity.get(&commodity.id),
             None => panic!("Can't fetch last price of an account without a commodity"),
+        }
+    }
+
+    fn populate_from_sqlite(&mut self, conn: &Connection) {
+        let mut stmt = conn
+            .prepare("-- NOTE: This query uses a quirk of SQLite that does not comply with the SQL standard
+                      -- (SQLite lets you `GROUP BY` columns, then select non-aggregate columns)
+                      -- It's handy here, but it may not be portable to other SQL implementations
+                      SELECT -- Fraction which forms the actual price
+                             p.value_num, p.value_denom,
+
+                             -- Last known price date
+                             max(p.date),
+
+                             -- Commodity for which the price is being quoted
+                             from_c.mnemonic, from_c.namespace, from_c.fullname,
+
+                             -- Commodity in which the price is defined (generally a currency)
+                             to_c.mnemonic, to_c.namespace, to_c.fullname
+                        FROM prices p
+                             JOIN commodities from_c ON p.commodity_guid = from_c.guid
+                             JOIN commodities to_c   ON p.currency_guid = to_c.guid
+                       WHERE from_c.namespace = 'FUND'
+                       GROUP BY p.commodity_guid;")
+            .expect("Invalid SQL");
+
+        let price_iter = stmt
+            .query_map(NO_PARAMS, |row| {
+                let num: i64 = row.get(0);
+                let denom: i64 = row.get(1);
+                let value: Decimal = Decimal::from(num) / Decimal::from(denom);
+
+                let dt: String = row.get(2);
+
+                let price = Price {
+                    value,
+                    time: utc_to_datetime(&dt),
+                    from_commodity: Commodity::new(row.get(3), row.get(4), row.get(5)),
+                    to_commodity: Commodity::new(row.get(6), row.get(7), row.get(8)),
+                };
+                price
+            })
+            .expect("Could not iterate over SQL results");
+        for price in price_iter {
+            self.add_price(price.unwrap());
         }
     }
 
@@ -269,7 +333,7 @@ struct LazySplit {
 impl GenericSplit for LazySplit {
     fn get_quantity(&self) -> Decimal {
         match &self.quantity_fraction {
-            Ok(frac) => to_quantity(&frac),
+            Ok(frac) => frac_to_quantity(&frac),
             Err(_) => panic!("Error parsing quantity"),
         }
     }
@@ -277,7 +341,7 @@ impl GenericSplit for LazySplit {
     #[allow(dead_code)]
     fn get_value(&self) -> Decimal {
         match &self.value_fraction {
-            Ok(frac) => to_quantity(&frac),
+            Ok(frac) => frac_to_quantity(&frac),
             Err(_) => panic!("Error parsing value"),
         }
     }
@@ -347,8 +411,9 @@ struct Transaction {
 }
 
 impl Transaction {
-    fn date_posted(&self) -> DateTime<FixedOffset> {
-        DateTime::parse_from_str(&self.date_posted_string, GNUCASH_DT_FORMAT).unwrap()
+    #[allow(dead_code)]
+    fn date_posted(&self) -> DateTime<Local> {
+        to_datetime(&self.date_posted_string)
     }
 
     fn parse_splits(reader: &mut Reader<BufReader<File>>) -> Vec<Box<GenericSplit>> {
@@ -479,6 +544,43 @@ impl Account {
         }
     }
 
+    fn read_splits_from_sqlite(&mut self, conn: &Connection) {
+        let mut stmt = conn
+            .prepare(
+                "SELECT account_guid,
+                        value_num, value_denom,
+                        quantity_num, quantity_denom
+                   FROM splits
+                  WHERE account_guid = $1
+                  ",
+            )
+            .expect("Invalid SQL");
+
+        let splits = stmt
+            .query_map([&self.guid].iter(), |row| {
+                let account: String = row.get(0);
+
+                let value_num: i64 = row.get(1);
+                let value_denom: i64 = row.get(2);
+                let value: Decimal = Decimal::from(value_num) / Decimal::from(value_denom);
+
+                let quantity_num: i64 = row.get(3);
+                let quantity_denom: i64 = row.get(4);
+                let quantity: Decimal = Decimal::from(quantity_num) / Decimal::from(quantity_denom);
+
+                let split: Box<GenericSplit> = Box::new(Split {
+                    value,
+                    quantity,
+                    account,
+                });
+                split
+            })
+            .unwrap()
+            .map(|ret| ret.unwrap())
+            .collect();
+        self.splits = splits;
+    }
+
     fn is_investment(&self) -> bool {
         match self.commodity {
             Some(ref commodity) => commodity.is_investment(),
@@ -561,7 +663,7 @@ impl GnucashFromXML for Account {
     }
 }
 
-fn to_quantity(fraction: &str) -> Decimal {
+fn frac_to_quantity(fraction: &str) -> Decimal {
     let mut components = fraction.split("/");
     let numerator = components.next().unwrap();
     let denomenator = components.next().unwrap();
@@ -581,7 +683,14 @@ impl Book {
         }
     }
 
-    pub fn from_file(filename: &str) -> Book {
+    pub fn from_sqlite_file(filename: &str) -> Book {
+        let conn = Connection::open(filename).expect("Could not open file");
+        Book::from_sqlite(&conn)
+    }
+
+    #[allow(dead_code)]
+    pub fn from_xml_file(filename: &str) -> Book {
+        println!("This can be sluggish on larger XML files. Consider SQLite format instead!");
         let mut reader = Reader::from_file(filename).unwrap();
         Book::from_xml(&mut reader)
     }
@@ -647,6 +756,50 @@ impl Book {
             }
         }
         Portfolio::new(by_asset_class.into_iter().map(|(_, v)| v).collect())
+    }
+
+    fn investment_accounts(conn: &Connection) -> Vec<Account> {
+        let mut stmt = conn
+            .prepare(
+                "SELECT a.guid, a.name, a.account_type,
+                        -- Commodity for the account
+                        c.mnemonic, c.namespace, c.fullname
+                   FROM accounts a
+                        JOIN commodities c ON a.commodity_guid = c.guid
+                  WHERE c.namespace = 'FUND'
+                  ",
+            )
+            .expect("Invalid SQL");
+
+        let investment_accounts = stmt
+            .query_map(NO_PARAMS, |row| {
+                let guid = row.get(0);
+                let name = row.get(1);
+                let typ = row.get(2);
+                let commodity = Commodity::new(row.get(3), row.get(4), row.get(5));
+
+                Account::new(guid, name, typ, Some(commodity))
+            })
+            .unwrap()
+            .map(|ret| ret.unwrap())
+            .collect();
+
+        investment_accounts
+    }
+}
+
+impl GnucashFromSqlite for Book {
+    fn from_sqlite(conn: &Connection) -> Book {
+        let mut book = Book::new();
+
+        for mut account in Book::investment_accounts(conn) {
+            assert!(account.is_investment());
+            account.read_splits_from_sqlite(conn);
+            book.add_investment(account);
+        }
+
+        book.pricedb.populate_from_sqlite(conn);
+        book
     }
 }
 
