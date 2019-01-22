@@ -405,6 +405,7 @@ impl GnucashFromXML for LazySplit {
 }
 
 struct Transaction {
+    #[allow(dead_code)]
     name: String,
     date_posted_string: String,
     splits: Vec<Box<GenericSplit>>,
@@ -523,7 +524,6 @@ impl GnucashFromXML for Transaction {
 struct Account {
     guid: String,
     name: String,
-    typ: String, // e.g. 'STOCK'
 
     // Some accounts, e.g. parent accounts or the ROOT account have no commodity
     commodity: Option<Commodity>,
@@ -532,13 +532,12 @@ struct Account {
 }
 
 impl Account {
-    fn new(guid: String, name: String, typ: String, commodity: Option<Commodity>) -> Self {
+    fn new(guid: String, name: String, commodity: Option<Commodity>) -> Self {
         // Start with an empty vector, we'll mutate later
         let splits = Vec::new();
         Self {
             guid,
             name,
-            typ,
             commodity,
             splits,
         }
@@ -624,7 +623,6 @@ impl GnucashFromXML for Account {
 
         let mut guid: String = String::from("");
         let mut name: String = String::from("");
-        let mut typ: String = String::from("");
         let mut commodity = None;
 
         loop {
@@ -636,9 +634,6 @@ impl GnucashFromXML for Account {
                     }
                     b"act:name" => {
                         name = reader.read_text(e.name(), &mut Vec::new()).unwrap();
-                    }
-                    b"act:type" => {
-                        typ = reader.read_text(e.name(), &mut Vec::new()).unwrap();
                     }
                     b"act:commodity" => {
                         commodity = Some(Commodity::from_xml(&mut reader));
@@ -659,7 +654,7 @@ impl GnucashFromXML for Account {
             buf.clear();
         }
 
-        Account::new(guid, name, typ, commodity)
+        Account::new(guid, name, commodity)
     }
 }
 
@@ -761,7 +756,7 @@ impl Book {
     fn investment_accounts(conn: &Connection) -> Vec<Account> {
         let mut stmt = conn
             .prepare(
-                "SELECT a.guid, a.name, a.account_type,
+                "SELECT a.guid, a.name,
                         -- Commodity for the account
                         c.mnemonic, c.namespace, c.fullname
                    FROM accounts a
@@ -775,10 +770,9 @@ impl Book {
             .query_map(NO_PARAMS, |row| {
                 let guid = row.get(0);
                 let name = row.get(1);
-                let typ = row.get(2);
-                let commodity = Commodity::new(row.get(3), row.get(4), row.get(5));
+                let commodity = Commodity::new(row.get(2), row.get(3), row.get(4));
 
-                Account::new(guid, name, typ, Some(commodity))
+                Account::new(guid, name, Some(commodity))
             })
             .unwrap()
             .map(|ret| ret.unwrap())
