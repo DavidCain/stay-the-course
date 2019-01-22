@@ -7,6 +7,7 @@ use self::quick_xml::events::Event;
 use self::quick_xml::Reader;
 use self::rust_decimal::Decimal;
 use std::collections::HashMap;
+use std::convert::Into;
 use std::fs::File;
 use std::io::BufReader;
 use std::str::FromStr;
@@ -229,8 +230,35 @@ impl GnucashFromXML for Commodity {
     }
 }
 
-#[derive(Debug)]
+trait GenericSplit {
+    fn get_quantity(&self) -> Decimal;
+    fn get_value(&self) -> Decimal;
+    fn get_account_name(&self) -> &str;
+}
+
+// Simple split that can be used when we don't care to defer Decimal arithmetic
 struct Split {
+    value: Decimal,
+    quantity: Decimal,
+    account: String, // guid
+}
+
+impl GenericSplit for Split {
+    fn get_quantity(&self) -> Decimal {
+        self.quantity
+    }
+
+    fn get_value(&self) -> Decimal {
+        self.value
+    }
+
+    fn get_account_name(&self) -> &str {
+        &self.account
+    }
+}
+
+#[derive(Debug)]
+struct LazySplit {
     // Parsing value & quantity into Decimal is expensive.
     // Don't bother if we don't need to.
     value_fraction: Result<String, quick_xml::Error>,
@@ -238,24 +266,39 @@ struct Split {
     account: String, // guid
 }
 
-impl Split {
-    pub fn quantity(&self) -> Decimal {
+impl GenericSplit for LazySplit {
+    fn get_quantity(&self) -> Decimal {
         match &self.quantity_fraction {
             Ok(frac) => to_quantity(&frac),
             Err(_) => panic!("Error parsing quantity"),
         }
     }
 
-    pub fn value(&self) -> Decimal {
+    #[allow(dead_code)]
+    fn get_value(&self) -> Decimal {
         match &self.value_fraction {
             Ok(frac) => to_quantity(&frac),
             Err(_) => panic!("Error parsing value"),
         }
     }
+
+    fn get_account_name(&self) -> &str {
+        &self.account
+    }
 }
 
-impl GnucashFromXML for Split {
-    fn from_xml(reader: &mut Reader<BufReader<File>>) -> Split {
+impl Into<Split> for LazySplit {
+    fn into(self) -> Split {
+        Split {
+            value: self.get_value(),
+            quantity: self.get_quantity(),
+            account: self.account,
+        }
+    }
+}
+
+impl GnucashFromXML for LazySplit {
+    fn from_xml(reader: &mut Reader<BufReader<File>>) -> Self {
         let mut buf = Vec::new();
 
         let mut value_fraction = None;
@@ -287,7 +330,7 @@ impl GnucashFromXML for Split {
         }
 
         match (value_fraction, quantity_fraction, account) {
-            (Some(value_fraction), Some(quantity_fraction), Some(account)) => Split {
+            (Some(value_fraction), Some(quantity_fraction), Some(account)) => Self {
                 value_fraction,
                 quantity_fraction,
                 account,
@@ -297,11 +340,10 @@ impl GnucashFromXML for Split {
     }
 }
 
-#[derive(Debug)]
 struct Transaction {
     name: String,
     date_posted_string: String,
-    splits: Vec<Split>,
+    splits: Vec<Box<GenericSplit>>,
 }
 
 impl Transaction {
@@ -309,9 +351,8 @@ impl Transaction {
         DateTime::parse_from_str(&self.date_posted_string, GNUCASH_DT_FORMAT).unwrap()
     }
 
-    fn parse_splits(reader: &mut Reader<BufReader<File>>) -> Vec<Split> {
-        let mut splits: Vec<Split> = Vec::new();
-
+    fn parse_splits(reader: &mut Reader<BufReader<File>>) -> Vec<Box<GenericSplit>> {
+        let mut splits: Vec<Box<GenericSplit>> = Vec::new();
         let mut buf = Vec::new();
 
         loop {
@@ -319,7 +360,7 @@ impl Transaction {
                 // Stop at the top of all top-level tags that have content we care about
                 Ok(Event::Start(ref e)) => match e.name() {
                     b"trn:split" => {
-                        splits.push(Split::from_xml(reader));
+                        splits.push(Box::new(LazySplit::from_xml(reader)));
                     }
                     _ => panic!("Unexpected tag in list of splits"),
                 },
@@ -414,7 +455,6 @@ impl GnucashFromXML for Transaction {
     }
 }
 
-#[derive(Debug)]
 struct Account {
     guid: String,
     name: String,
@@ -423,7 +463,7 @@ struct Account {
     // Some accounts, e.g. parent accounts or the ROOT account have no commodity
     commodity: Option<Commodity>,
 
-    splits: Vec<Split>,
+    splits: Vec<Box<GenericSplit>>,
 }
 
 impl Account {
@@ -446,15 +486,19 @@ impl Account {
         }
     }
 
-    fn add_split(&mut self, split: Split) {
-        self.splits.push(split);
+    fn add_split<T: GenericSplit + 'static>(&mut self, split: T) {
+        self.splits.push(Box::new(split));
+    }
+
+    fn add_boxed_split<T: GenericSplit + 'static>(&mut self, boxed_split: Box<T>) {
+        self.splits.push(boxed_split);
     }
 
     fn current_quantity(&self) -> Decimal {
         // std::iter::Sum<d128> isn't implemented. =(
         let mut total = 0.into();
         for split in self.splits.iter() {
-            total += split.quantity();
+            total += split.get_quantity();
         }
         total
     }
@@ -542,8 +586,15 @@ impl Book {
         Book::from_xml(&mut reader)
     }
 
-    fn add_split(&mut self, split: Split) {
-        match self.account_by_guid.get_mut(&split.account) {
+    fn add_boxed_split<T: GenericSplit + 'static>(&mut self, boxed_split: Box<T>) {
+        match self.account_by_guid.get_mut(boxed_split.get_account_name()) {
+            Some(account) => account.add_boxed_split(boxed_split),
+            None => (),
+        }
+    }
+
+    fn add_split<T: GenericSplit + 'static>(&mut self, split: T) {
+        match self.account_by_guid.get_mut(split.get_account_name()) {
             Some(account) => account.add_split(split),
             None => (),
         }
@@ -627,8 +678,8 @@ impl GnucashFromXML for Book {
                         // By the time we've reached this section, we've parsed all accounts.
                         b"gnc:transaction" => {
                             let transaction = Transaction::from_xml(reader);
-                            for split in transaction.splits.into_iter() {
-                                book.add_split(split);
+                            for lazy_split in transaction.splits.into_iter() {
+                                book.add_split(lazy_split);
                             }
                         }
                         _ => (),
