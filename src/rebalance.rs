@@ -108,8 +108,15 @@ impl Portfolio {
         };
         println!("{:} the following amounts:", verb);
 
+        let zero: Decimal = 0.into();
         for asset in self.allocations.iter() {
-            let start_ratio: Decimal = asset.current_value() / portfolio_total;
+            let start_ratio: Decimal = if portfolio_total == zero {
+                // If our starting portfolio was empty, we don't want to divide by zero
+                // Treat an asset classs as holding 0% of an empty portfolio
+                zero
+            } else {
+                asset.current_value() / portfolio_total
+            };
             println!(
                 " - {:?}: ${:.2}",
                 asset.asset_class,
@@ -125,6 +132,14 @@ impl Portfolio {
     }
 }
 
+fn proportionally_allocate(mut portfolio: Portfolio, contribution: Decimal) -> Portfolio {
+    for mut asset in portfolio.allocations.iter_mut() {
+        let amount = asset.target_ratio * contribution;
+        asset.add_contribution(amount);
+    }
+    portfolio
+}
+
 pub fn optimally_allocate(mut portfolio: Portfolio, contribution: Decimal) -> Portfolio {
     if contribution == 0.into() {
         panic!("Must deposit or withdraw in order to rebalance");
@@ -134,13 +149,29 @@ pub fn optimally_allocate(mut portfolio: Portfolio, contribution: Decimal) -> Po
         panic!("Cannot rebalance unless total is 100%");
     }
 
+    let current_value = portfolio.current_value();
+    if contribution.is_sign_negative() {
+        assert!(
+            contribution.abs() < current_value,
+            "Cannot withdraw more than portfolio!"
+        );
+    }
+    if current_value == 0.into() {
+        return proportionally_allocate(portfolio, contribution);
+    }
+
+    assert!(
+        !current_value.is_sign_negative(),
+        "Can't handle a portfolio with a negative balance"
+    );
+
     // The amount left for contribution begins as the total amount we have available
     // (We will portion this money out sequentially to each fund, eventually exhausting it)
     let mut amount_left_to_contribute = contribution.clone();
 
     // The new total is our portfolio's current value, plus the amount we'll contribute
     // In other words, this will be the denomenator for calculating final percent allocation
-    let new_total = portfolio.current_value() + contribution;
+    let new_total = current_value + contribution;
 
     // We sort our asset allocations by how much they've deviated from their target
     // If contributing: underallocated funds come first. Overallocated funds come last.
