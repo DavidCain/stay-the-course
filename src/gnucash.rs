@@ -155,14 +155,27 @@ impl PriceDatabase {
 
 #[derive(Debug)]
 struct Commodity {
+    id: String,            // "VTSAX
     space: Option<String>, // "FUND", "CURRENCY", etc.
-    id: String,    // "VTSAX
-    name: String,  // "Vanguard Total Stock Market Index Fund"
+    name: String,          // "Vanguard Total Stock Market Index Fund"
 }
 
 impl Commodity {
+    // Initialize with a potentially empty name
+    fn new(id: String, space: Option<String>, name: Option<String>) -> Self {
+        Self {
+            space,
+            // Name can be missing. Fall back to an ID if we lack a name
+            name: match name {
+                Some(commodity_name) => commodity_name,
+                None => id.clone(),
+            },
+            id,
+        }
+    }
+
     fn is_investment(&self) -> bool {
-        match &self.space  {
+        match &self.space {
             Some(space) => space == "FUND",
             None => false,
         }
@@ -210,18 +223,8 @@ impl GnucashFromXML for Commodity {
         }
 
         match id {
-            Some(id) => Commodity {
-                space,
-                // Name can be missing. Fall back to an ID if we lack a name
-                name: match name {
-                    Some(commodity_name) => commodity_name,
-                    None => id.clone(),
-                },
-                id,
-            },
-            _ => {
-                panic!("Commodities must have an ID!")
-            }
+            Some(id) => Commodity::new(id, space, name),
+            _ => panic!("Commodities must have an ID!"),
         }
     }
 }
@@ -424,6 +427,18 @@ struct Account {
 }
 
 impl Account {
+    fn new(guid: String, name: String, typ: String, commodity: Option<Commodity>) -> Self {
+        // Start with an empty vector, we'll mutate later
+        let splits = Vec::new();
+        Self {
+            guid,
+            name,
+            typ,
+            commodity,
+            splits,
+        }
+    }
+
     fn is_investment(&self) -> bool {
         match self.commodity {
             Some(ref commodity) => commodity.is_investment(),
@@ -498,15 +513,7 @@ impl GnucashFromXML for Account {
             buf.clear();
         }
 
-        // Start with an empty vector, we'll mutate later
-        let splits = Vec::new();
-        Account {
-            guid,
-            name,
-            typ,
-            commodity,
-            splits,
-        }
+        Account::new(guid, name, typ, commodity)
     }
 }
 
