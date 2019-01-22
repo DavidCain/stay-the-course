@@ -832,7 +832,7 @@ impl GnucashFromXML for Book {
                         b"gnc:transaction" => {
                             let transaction = Transaction::from_xml(reader);
                             for lazy_split in transaction.splits.into_iter() {
-                                book.add_split(lazy_split);
+                                //book.add_split(lazy_split);
                             }
                         }
                         _ => (),
