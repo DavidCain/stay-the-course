@@ -1,3 +1,6 @@
+[![Build Status](https://api.travis-ci.com/DavidCain/stay-the-course.svg?branch=master)](https://travis-ci.com/DavidCain/stay-the-course/)
+
+
 _This tool is a work in progress, and a first project to learn Rust._
 
 **Warning:** The author is neither a tax professional nor a retirement advisor.
@@ -109,7 +112,6 @@ investor plains to perform [tax loss harvesting][tax_loss_harvesting].
 ## Major tasks outstanding
 This project is very much a work in progress. Some key outstanding tasks:
 
-- [ ] Automated build support
 - [ ] Optimize XML parsing (currently takes a couple seconds on a 20MB file)
 - [ ] Command line interface
 - [ ] Use a CSV (default included, but support user-provided) that maps ticker
