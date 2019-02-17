@@ -110,7 +110,6 @@ investor plains to perform [tax loss harvesting][tax_loss_harvesting].
 This project is very much a work in progress. Some key outstanding tasks:
 
 - [ ] Automated build support
-- [ ] Fix XML format parsing (only SQLite works at present)
 - [ ] Optimize XML parsing (currently takes a couple seconds on a 20MB file)
 - [ ] Command line interface
 - [ ] Use a CSV (default included, but support user-provided) that maps ticker

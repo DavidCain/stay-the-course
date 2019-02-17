@@ -295,27 +295,22 @@ impl GnucashFromXML for Commodity {
 trait GenericSplit {
     fn get_quantity(&self) -> Decimal;
     fn get_value(&self) -> Decimal;
-    fn get_account_name(&self) -> &str;
 }
 
 // Simple split that can be used when we don't care to defer Decimal arithmetic
-struct Split {
+struct ComputedSplit {
     value: Decimal,
     quantity: Decimal,
     account: String, // guid
 }
 
-impl GenericSplit for Split {
+impl GenericSplit for ComputedSplit {
     fn get_quantity(&self) -> Decimal {
         self.quantity
     }
 
     fn get_value(&self) -> Decimal {
         self.value
-    }
-
-    fn get_account_name(&self) -> &str {
-        &self.account
     }
 }
 
@@ -343,15 +338,11 @@ impl GenericSplit for LazySplit {
             Err(_) => panic!("Error parsing value"),
         }
     }
-
-    fn get_account_name(&self) -> &str {
-        &self.account
-    }
 }
 
-impl Into<Split> for LazySplit {
-    fn into(self) -> Split {
-        Split {
+impl Into<ComputedSplit> for LazySplit {
+    fn into(self) -> ComputedSplit {
+        ComputedSplit {
             value: self.get_value(),
             quantity: self.get_quantity(),
             account: self.account,
@@ -402,11 +393,16 @@ impl GnucashFromXML for LazySplit {
     }
 }
 
+enum Split {
+    Computed(ComputedSplit),
+    Lazy(LazySplit),
+}
+
 struct Transaction {
     #[allow(dead_code)]
     name: String,
     date_posted_string: String,
-    splits: Vec<Box<GenericSplit>>,
+    splits: Vec<Split>,
 }
 
 impl Transaction {
@@ -415,8 +411,8 @@ impl Transaction {
         to_datetime(&self.date_posted_string)
     }
 
-    fn parse_splits(reader: &mut Reader<BufReader<File>>) -> Vec<Box<GenericSplit>> {
-        let mut splits: Vec<Box<GenericSplit>> = Vec::new();
+    fn parse_splits(reader: &mut Reader<BufReader<File>>) -> Vec<Split> {
+        let mut splits: Vec<Split> = Vec::new();
         let mut buf = Vec::new();
 
         loop {
@@ -424,7 +420,7 @@ impl Transaction {
                 // Stop at the top of all top-level tags that have content we care about
                 Ok(Event::Start(ref e)) => match e.name() {
                     b"trn:split" => {
-                        splits.push(Box::new(LazySplit::from_xml(reader)));
+                        splits.push(Split::Lazy(LazySplit::from_xml(reader)));
                     }
                     _ => panic!("Unexpected tag in list of splits"),
                 },
@@ -526,7 +522,7 @@ struct Account {
     // Some accounts, e.g. parent accounts or the ROOT account have no commodity
     commodity: Option<Commodity>,
 
-    splits: Vec<Box<GenericSplit>>,
+    splits: Vec<Split>,
 }
 
 impl Account {
@@ -565,15 +561,15 @@ impl Account {
                 let quantity_denom: i64 = row.get(4);
                 let quantity: Decimal = Decimal::from(quantity_num) / Decimal::from(quantity_denom);
 
-                let split: Box<GenericSplit> = Box::new(Split {
+                let split = ComputedSplit {
                     value,
                     quantity,
                     account,
-                });
+                };
                 split
             })
             .unwrap()
-            .map(|ret| ret.unwrap())
+            .map(|ret| Split::Computed(ret.unwrap()))
             .collect();
         self.splits = splits;
     }
@@ -585,19 +581,18 @@ impl Account {
         false
     }
 
-    fn add_split<T: GenericSplit + 'static>(&mut self, split: T) {
-        self.splits.push(Box::new(split));
-    }
-
-    fn add_boxed_split<T: GenericSplit + 'static>(&mut self, boxed_split: Box<T>) {
-        self.splits.push(boxed_split);
+    fn add_split(&mut self, split: Split) {
+        self.splits.push(split);
     }
 
     fn current_quantity(&self) -> Decimal {
         // std::iter::Sum<d128> isn't implemented. =(
         let mut total = 0.into();
         for split in self.splits.iter() {
-            total += split.get_quantity();
+            total += match split {
+                Split::Lazy(lazy_split) => lazy_split.get_quantity(),
+                Split::Computed(computed_split) => computed_split.get_quantity(),
+            }
         }
         total
     }
@@ -688,15 +683,12 @@ impl Book {
         Book::from_xml(&mut reader)
     }
 
-    fn add_boxed_split<T: GenericSplit + 'static>(&mut self, boxed_split: Box<T>) {
-        match self.account_by_guid.get_mut(boxed_split.get_account_name()) {
-            Some(account) => account.add_boxed_split(boxed_split),
-            None => (),
-        }
-    }
-
-    fn add_split<T: GenericSplit + 'static>(&mut self, split: T) {
-        match self.account_by_guid.get_mut(split.get_account_name()) {
+    fn add_split(&mut self, split: Split) {
+        let account_name = match &split {
+            Split::Lazy(lazy_split) => lazy_split.account.clone(),
+            Split::Computed(computed_split) => computed_split.account.clone(),
+        };
+        match self.account_by_guid.get_mut(&account_name) {
             Some(account) => account.add_split(split),
             None => (),
         }
@@ -823,8 +815,8 @@ impl GnucashFromXML for Book {
                         // By the time we've reached this section, we've parsed all accounts.
                         b"gnc:transaction" => {
                             let transaction = Transaction::from_xml(reader);
-                            for lazy_split in transaction.splits.into_iter() {
-                                //book.add_split(lazy_split);
+                            for split in transaction.splits.into_iter() {
+                                book.add_split(split);
                             }
                         }
                         _ => (),
