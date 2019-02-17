@@ -116,6 +116,7 @@ This project is very much a work in progress. Some key outstanding tasks:
 - [ ] Use a CSV (default included, but support user-provided) that maps ticker
       names to asset classes
 - [ ] Warn when the last known price for a security is too old
+- [ ] Return Result instead of just panicking on error conditions
 
 ## External resources
 - [Optimal rebalancing][optimal_rebalancing]: The excellent web tool by Albert

@@ -227,8 +227,8 @@ struct Commodity {
 
 impl Commodity {
     // Initialize with a potentially empty name
-    fn new(id: String, space: Option<String>, name: Option<String>) -> Self {
-        Self {
+    fn new(id: String, space: Option<String>, name: Option<String>) -> Commodity {
+        Commodity {
             space,
             // Name can be missing. Fall back to an ID if we lack a name
             name: match name {
@@ -274,10 +274,8 @@ impl GnucashFromXML for Commodity {
                 // (We don't want to progress into other tags)
                 // (Doesn't handle nested tags, but that's okay - gnc:commodity never nests)
                 Ok(Event::End(ref e)) => match e.name() {
-                    b"act:commodity" => break,
-                    b"gnc:commodity" => break,
-                    b"price:commodity" => break,
                     b"price:currency" => break,
+                    b"act:commodity" | b"gnc:commodity" | b"price:commodity" => break,
                     _ => (),
                 },
                 Ok(Event::Eof) => panic!("Unexpected EOF before closing commodity tag!"),
@@ -362,7 +360,7 @@ impl Into<Split> for LazySplit {
 }
 
 impl GnucashFromXML for LazySplit {
-    fn from_xml(reader: &mut Reader<BufReader<File>>) -> Self {
+    fn from_xml(reader: &mut Reader<BufReader<File>>) -> LazySplit {
         let mut buf = Vec::new();
 
         let mut value_fraction = None;
@@ -394,7 +392,7 @@ impl GnucashFromXML for LazySplit {
         }
 
         match (value_fraction, quantity_fraction, account) {
-            (Some(value_fraction), Some(quantity_fraction), Some(account)) => Self {
+            (Some(value_fraction), Some(quantity_fraction), Some(account)) => LazySplit {
                 value_fraction,
                 quantity_fraction,
                 account,
@@ -532,10 +530,10 @@ struct Account {
 }
 
 impl Account {
-    fn new(guid: String, name: String, commodity: Option<Commodity>) -> Self {
+    fn new(guid: String, name: String, commodity: Option<Commodity>) -> Account {
         // Start with an empty vector, we'll mutate later
         let splits = Vec::new();
-        Self {
+        Account {
             guid,
             name,
             commodity,
@@ -581,10 +579,10 @@ impl Account {
     }
 
     fn is_investment(&self) -> bool {
-        match self.commodity {
-            Some(ref commodity) => commodity.is_investment(),
-            None => false,
+        if let Some(ref commodity) = self.commodity {
+            return commodity.is_investment();
         }
+        false
     }
 
     fn add_split<T: GenericSplit + 'static>(&mut self, split: T) {
