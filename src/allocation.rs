@@ -85,12 +85,6 @@ mod tests {
     }
 
     #[test]
-    fn test_age_in_weeks() {
-        let birthday = NaiveDate::from_ymd(1863, 11, 19);
-        assert_eq!(age_in_weeks(birthday), 8100);
-    }
-
-    #[test]
     fn test_bond_allocation_ancient_investor() {
         let birthday = NaiveDate::from_ymd(1863, 11, 19);
         assert_eq!(bond_allocation(birthday, 100), Decimal::from(1));
