@@ -729,19 +729,18 @@ impl Book {
                 price.value
             );
 
-            match &account.commodity {
-                Some(commodity) => {
-                    let asset_class = asset_classifications.classify(&commodity.id).unwrap();
-                    match by_asset_class.get_mut(asset_class) {
-                        Some(allocation) => allocation.add_asset(assets::Asset {
-                            asset_class: asset_class.to_owned(),
-                            value: value,
-                            name: account.name.clone(),
-                        }),
-                        None => (), // Ignoring asset type not included in allocation
-                    }
+            if let Some(commodity) = &account.commodity {
+                let asset_class = asset_classifications.classify(&commodity.id).unwrap();
+                // We ignore asset type not included in allocation
+                if let Some(allocation) = by_asset_class.get_mut(asset_class) {
+                    allocation.add_asset(assets::Asset {
+                        asset_class: asset_class.to_owned(),
+                        value: value,
+                        name: account.name.clone(),
+                    });
                 }
-                None => panic!("Account lacks a commodity! This should not happen"),
+            } else {
+                panic!("Account lacks a commodity! This should not happen");
             }
         }
         Portfolio::new(by_asset_class.into_iter().map(|(_, v)| v).collect())
