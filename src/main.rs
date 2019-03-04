@@ -1,3 +1,5 @@
+#[macro_use]
+extern crate serde_derive;
 extern crate chrono;
 extern crate rust_decimal;
 
@@ -33,7 +35,9 @@ fn main() {
     let bond_allocation = allocation::bond_allocation(birthday, 120);
     let ideal_allocations = allocation::core_four(bond_allocation);
 
-    let portfolio = book.portfolio_status(ideal_allocations);
+    let asset_classifications =
+        assets::AssetClassifications::from_csv("data/classified.csv").unwrap();
+    let portfolio = book.portfolio_status(asset_classifications, ideal_allocations);
 
     println!(
         "\nCurrent portfolio totals ${:.0}",

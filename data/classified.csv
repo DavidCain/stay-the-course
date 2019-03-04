@@ -1,0 +1,12 @@
+ticker_name,asset_class,name
+VTSAX,USStocks,"Vanguard Total Stock Market Index Fund Admiral Shares"
+VFIAX,USStocks,"Vanguard 500 Index Fund Admiral Shares"
+FZROX,USStocks,"Fidelity Total Market Index Fund"
+FZILX,IntlStocks,"Fidelity International Index Fund"
+VTIAX,IntlStocks,"Vanguard Total International Stock Index Fund Admiral Shares"
+VBTLX,USBonds,"Vanguard Total Bond Market Index Fund Admiral Shares"
+VGSLX,REIT,"Vanguard Real Estate Index Fund Admiral Shares"
+FZFXX,Cash,"Fidelity Treasury Money Market Fund"
+VMFXX,Cash,"Vanguard Money Market Reserves Federal Money Market Fund"
+VFFVX,Target,"Vanguard Target Retirement 2055 Fund"
+VTTSX,Target,"Vanguard Target Retirement 2060 Fund"

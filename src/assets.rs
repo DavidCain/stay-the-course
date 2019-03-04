@@ -1,15 +1,46 @@
+extern crate csv;
 extern crate rust_decimal;
+extern crate serde_derive;
 
 use self::rust_decimal::Decimal;
+use std::collections::HashMap;
+use std::error::Error;
+use std::fmt;
+use std::io;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct UnclassifiedAssetError {
+    fund_name: String,
+}
+
+impl UnclassifiedAssetError {
+    fn new(fund_name: &str) -> UnclassifiedAssetError {
+        UnclassifiedAssetError {
+            fund_name: fund_name.to_string(),
+        }
+    }
+}
+
+impl fmt::Display for UnclassifiedAssetError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "asset {:} not classified", self.fund_name)
+    }
+}
+
+impl Error for UnclassifiedAssetError {
+    fn description(&self) -> &str {
+        "asset not classified"
+    }
+}
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Asset {
-    pub asset_class: AssetClass,
     pub name: String,
     pub value: Decimal,
+    pub asset_class: AssetClass,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum AssetClass {
     USBonds,
     USStocks,
@@ -20,19 +51,108 @@ pub enum AssetClass {
     Cash,
 }
 
-pub fn classify(fund_name: &str) -> AssetClass {
-    match fund_name {
-        "VTSAX" => AssetClass::USStocks,
-        "VFIAX" => AssetClass::USStocks,
-        "FZROX" => AssetClass::USStocks,
-        "FZILX" => AssetClass::IntlStocks,
-        "VTIAX" => AssetClass::IntlStocks,
-        "VBTLX" => AssetClass::USBonds,
-        "VGSLX" => AssetClass::REIT,
-        "FZFXX" => AssetClass::Cash,   // Fidelity core position
-        "VMFXX" => AssetClass::Cash,   // Vanguard settlement fund
-        "VFFVX" => AssetClass::Target, // Target 2055
-        "VTTSX" => AssetClass::Target, // Target 2060
-        _ => panic!("Unknown fund name {:?}", fund_name),
+/// This struct is used in 'data/classified.csv' to map from ticker names to asset classes
+#[derive(Debug, Deserialize, Serialize)]
+struct AssetClassMapping {
+    ticker_name: String,
+    asset_class: AssetClass,
+}
+
+pub struct AssetClassifications {
+    mapping: HashMap<String, AssetClass>,
+}
+
+impl AssetClassifications {
+    pub fn new() -> AssetClassifications {
+        AssetClassifications {
+            mapping: HashMap::new(),
+        }
+    }
+
+    fn add(&mut self, name: String, asset_class: AssetClass) {
+        self.mapping.insert(name, asset_class);
+    }
+
+    pub fn from_csv(path: &str) -> Result<AssetClassifications, Box<Error>> {
+        let rdr = csv::Reader::from_path(path)?;
+        AssetClassifications::from_reader(rdr)
+    }
+
+    fn from_reader<R: io::Read>(
+        mut rdr: csv::Reader<R>,
+    ) -> Result<AssetClassifications, Box<Error>> {
+        let mut asset_classifications = AssetClassifications::new();
+        for result in rdr.deserialize() {
+            let asset_class: AssetClassMapping = result?;
+            let name = String::from(asset_class.ticker_name);
+            asset_classifications.add(name, asset_class.asset_class);
+        }
+        Ok(asset_classifications)
+    }
+
+    pub fn classify(&self, fund_name: &str) -> Result<&AssetClass, UnclassifiedAssetError> {
+        self.mapping
+            .get(fund_name)
+            .ok_or_else(|| UnclassifiedAssetError::new(fund_name))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_serialize_from_empty_csv() {
+        let data = "ticker_name,asset_class";
+        let rdr = csv::Reader::from_reader(data.as_bytes());
+        let ac = AssetClassifications::from_reader(rdr).unwrap();
+        assert_eq!(
+            ac.classify("VTSAX"),
+            Err(UnclassifiedAssetError {
+                fund_name: String::from("VTSAX")
+            })
+        );
+    }
+
+    #[test]
+    fn test_serializing_from_csv() {
+        let data = "ticker_name,asset_class\nVTSAX,USStocks\nVFIAX,USStocks";
+        let rdr = csv::Reader::from_reader(data.as_bytes());
+        let ac = AssetClassifications::from_reader(rdr).unwrap();
+        assert_eq!(
+            ac.classify("VTSAX").unwrap().to_owned(),
+            AssetClass::USStocks
+        );
+        assert_eq!(
+            ac.classify("VFIAX").unwrap().to_owned(),
+            AssetClass::USStocks
+        );
+        assert_eq!(
+            ac.classify("ABCDE"),
+            Err(UnclassifiedAssetError {
+                fund_name: String::from("ABCDE")
+            })
+        );
+    }
+
+    /// If this fails, it is likely because one of the asset class names was changed!
+    #[test]
+    fn test_all_asset_classes() {
+        let data = "\
+ticker_name,asset_class
+AAAAA,USBonds
+BBBBB,USStocks
+CCCCC,IntlBonds
+DDDDD,IntlStocks
+EEEEE,REIT
+FFFFF,Target
+GGGGG,Cash";
+        let rdr = csv::Reader::from_reader(data.as_bytes());
+        AssetClassifications::from_reader(rdr).expect("All asset types are parseable");
+    }
+
+    #[test]
+    fn included_file_can_be_parsed() {
+        AssetClassifications::from_csv("data/classified.csv").expect("File can be parsed!");
     }
 }

@@ -698,7 +698,11 @@ impl Book {
         self.account_by_guid.insert(account.guid.clone(), account);
     }
 
-    pub fn portfolio_status(&self, ideal_allocations: Vec<AssetAllocation>) -> Portfolio {
+    pub fn portfolio_status(
+        &self,
+        asset_classifications: assets::AssetClassifications,
+        ideal_allocations: Vec<AssetAllocation>,
+    ) -> Portfolio {
         let mut by_asset_class: HashMap<assets::AssetClass, AssetAllocation> = HashMap::new();
         for allocation in ideal_allocations.into_iter() {
             by_asset_class.insert(allocation.asset_class.clone(), allocation);
@@ -727,11 +731,11 @@ impl Book {
 
             match &account.commodity {
                 Some(commodity) => {
-                    let asset_class = assets::classify(&commodity.id);
-                    match by_asset_class.get_mut(&asset_class) {
+                    let asset_class = asset_classifications.classify(&commodity.id).unwrap();
+                    match by_asset_class.get_mut(asset_class) {
                         Some(allocation) => allocation.add_asset(assets::Asset {
-                            asset_class,
-                            value,
+                            asset_class: asset_class.to_owned(),
+                            value: value,
                             name: account.name.clone(),
                         }),
                         None => (), // Ignoring asset type not included in allocation
