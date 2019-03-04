@@ -698,6 +698,37 @@ impl Book {
         self.account_by_guid.insert(account.guid.clone(), account);
     }
 
+    /// Return all investment holdings worth more than $0
+    fn holdings(&self, asset_classifications: assets::AssetClassifications) -> Vec<assets::Asset> {
+        let mut non_zero_holdings = Vec::new();
+        for account in self.account_by_guid.values() {
+            let last_price = self
+                .pricedb
+                .last_price_for(account)
+                .expect(&format!("No last price found for {:?}", account.commodity));
+
+            let value = account.current_value(last_price);
+            if value == 0.into() {
+                // We ignore empty accounts
+                continue;
+            }
+
+            if let Some(commodity) = &account.commodity {
+                let asset_class = asset_classifications.classify(&commodity.id).unwrap();
+                non_zero_holdings.push(assets::Asset::new(
+                    account.name.to_owned(),
+                    value,
+                    asset_class.to_owned(),
+                    Some(account.current_quantity()),
+                    Some(last_price.value),
+                ));
+            } else {
+                panic!("Account lacks a commodity! This should not happen");
+            }
+        }
+        non_zero_holdings
+    }
+
     pub fn portfolio_status(
         &self,
         asset_classifications: assets::AssetClassifications,
@@ -708,39 +739,10 @@ impl Book {
             by_asset_class.insert(allocation.asset_class.clone(), allocation);
         }
 
-        println!("Current assets held:");
-        for account in self.account_by_guid.values() {
-            let price = self
-                .pricedb
-                .last_price_for(account)
-                .expect(&format!("No last price found for {:?}", account.commodity));
-
-            let value = account.current_value(price);
-            if value == 0.into() {
-                // We ignore empty accounts
-                continue;
-            }
-
-            println!(
-                " - {:}: ${:.2} ({:} x ${:.2})",
-                account.name,
-                value,
-                account.current_quantity(),
-                price.value
-            );
-
-            if let Some(commodity) = &account.commodity {
-                let asset_class = asset_classifications.classify(&commodity.id).unwrap();
-                // We ignore asset type not included in allocation
-                if let Some(allocation) = by_asset_class.get_mut(asset_class) {
-                    allocation.add_asset(assets::Asset {
-                        asset_class: asset_class.to_owned(),
-                        value: value,
-                        name: account.name.clone(),
-                    });
-                }
-            } else {
-                panic!("Account lacks a commodity! This should not happen");
+        for asset in self.holdings(asset_classifications) {
+            // We ignore asset types not included in allocation
+            if let Some(allocation) = by_asset_class.get_mut(&asset.asset_class) {
+                allocation.add_asset(asset);
             }
         }
         Portfolio::new(by_asset_class.into_iter().map(|(_, v)| v).collect())

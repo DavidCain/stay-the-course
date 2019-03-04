@@ -38,6 +38,38 @@ pub struct Asset {
     pub name: String,
     pub value: Decimal,
     pub asset_class: AssetClass,
+    // Not strictly necessariy, but helpful for displaying info about the asset
+    quantity: Option<Decimal>,
+    last_price: Option<Decimal>,
+}
+
+impl Asset {
+    pub fn new(
+        name: String,
+        value: Decimal,
+        asset_class: AssetClass,
+        quantity: Option<Decimal>,
+        last_price: Option<Decimal>,
+    ) -> Asset {
+        Asset {
+            name,
+            value,
+            asset_class,
+            quantity,
+            last_price,
+        }
+    }
+}
+
+impl fmt::Display for Asset {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let descriptor = match (self.quantity, self.last_price) {
+            (Some(q), Some(p)) => format!("{:} x ${:.2}", q, p),
+            (_, _) => String::from("unknown price & quantity"),
+        };
+
+        write!(f, "{:}: ${:.2} ({:})", self.name, self.value, descriptor)
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -154,5 +186,32 @@ GGGGG,Cash";
     #[test]
     fn included_file_can_be_parsed() {
         AssetClassifications::from_csv("data/classified.csv").expect("File can be parsed!");
+    }
+
+    #[test]
+    fn asset_with_unknown_price_and_quantity() {
+        let asset = Asset::new(
+            String::from("VTABX"),
+            1234.into(),
+            AssetClass::IntlBonds,
+            None,
+            None,
+        );
+        assert_eq!(
+            format!("{}", asset),
+            "VTABX: $1234.00 (unknown price & quantity)"
+        );
+    }
+
+    #[test]
+    fn asset_formatting() {
+        let asset = Asset::new(
+            String::from("VTABX"),
+            10392.into(),
+            AssetClass::IntlBonds,
+            Some(Decimal::from(800)),
+            Some(Decimal::new(1299, 2)),
+        );
+        assert_eq!(format!("{}", asset), "VTABX: $10392.00 (800 x $12.99)");
     }
 }

@@ -269,11 +269,13 @@ mod tests {
     fn test_asset_types_must_match() {
         let mut stocks = AssetAllocation::new(AssetClass::USStocks, 1.into());
 
-        stocks.add_asset(Asset {
-            asset_class: AssetClass::IntlBonds,
-            name: String::from("VTABX"),
-            value: Decimal::from(1234),
-        });
+        stocks.add_asset(Asset::new(
+            String::from("VTABX"),
+            1234.into(),
+            AssetClass::IntlBonds,
+            None,
+            None,
+        ));
     }
 
     #[test]
@@ -281,19 +283,23 @@ mod tests {
         let mut stocks = AssetAllocation::new(AssetClass::USStocks, 1.into());
         assert_eq!(stocks.current_value(), 0.into());
 
-        stocks.add_asset(Asset {
-            asset_class: AssetClass::USStocks,
-            name: String::from("VTSAX"),
-            value: Decimal::from(8675),
-        });
+        stocks.add_asset(Asset::new(
+            String::from("VTSAX"),
+            8675.into(),
+            AssetClass::USStocks,
+            None,
+            None,
+        ));
 
         assert_eq!(stocks.current_value(), Decimal::from(8675));
 
-        stocks.add_asset(Asset {
-            asset_class: AssetClass::USStocks,
-            name: String::from("FZROX"),
-            value: Decimal::from(10000),
-        });
+        stocks.add_asset(Asset::new(
+            String::from("FZROX"),
+            10000.into(),
+            AssetClass::USStocks,
+            None,
+            None,
+        ));
 
         assert_eq!(stocks.current_value(), Decimal::from(18675));
     }
