@@ -721,6 +721,7 @@ impl Book {
                     asset_class.to_owned(),
                     Some(account.current_quantity()),
                     Some(last_price.value),
+                    Some(last_price.time),
                 ));
             } else {
                 panic!("Account lacks a commodity! This should not happen");

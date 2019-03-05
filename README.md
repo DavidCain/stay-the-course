@@ -114,7 +114,6 @@ This project is very much a work in progress. Some key outstanding tasks:
 
 - [ ] Optimize XML parsing (currently takes a couple seconds on a 20MB file)
 - [ ] Command line interface
-- [ ] Warn when the last known price for a security is too old
 - [ ] Return Result instead of just panicking on error conditions
 
 ## External resources

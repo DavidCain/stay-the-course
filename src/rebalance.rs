@@ -321,6 +321,7 @@ mod tests {
             AssetClass::IntlBonds,
             None,
             None,
+            None,
         ));
     }
 
@@ -335,6 +336,7 @@ mod tests {
             AssetClass::USStocks,
             None,
             None,
+            None,
         ));
 
         assert_eq!(stocks.current_value(), Decimal::from(8675));
@@ -343,6 +345,7 @@ mod tests {
             String::from("FZROX"),
             10000.into(),
             AssetClass::USStocks,
+            None,
             None,
             None,
         ));
@@ -397,6 +400,7 @@ mod tests {
             String::from("VBTLX"),
             10.into(),
             AssetClass::USBonds,
+            None,
             None,
             None,
         ));

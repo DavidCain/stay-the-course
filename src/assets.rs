@@ -1,7 +1,9 @@
+extern crate chrono;
 extern crate csv;
 extern crate rust_decimal;
 extern crate serde_derive;
 
+use self::chrono::{DateTime, Local};
 use self::rust_decimal::Decimal;
 use std::cmp::Ordering;
 use std::collections::HashMap;
@@ -42,6 +44,7 @@ pub struct Asset {
     // Not strictly necessariy, but helpful for displaying info about the asset
     quantity: Option<Decimal>,
     last_price: Option<Decimal>,
+    price_obtained: Option<DateTime<Local>>,
 }
 
 impl Asset {
@@ -51,6 +54,7 @@ impl Asset {
         asset_class: AssetClass,
         quantity: Option<Decimal>,
         last_price: Option<Decimal>,
+        price_obtained: Option<DateTime<Local>>,
     ) -> Asset {
         Asset {
             name,
@@ -58,6 +62,16 @@ impl Asset {
             asset_class,
             quantity,
             last_price,
+            price_obtained,
+        }
+    }
+}
+
+impl Asset {
+    fn price_is_dated(&self) -> bool {
+        match self.price_obtained {
+            Some(then) => (Local::now() - then).num_weeks() > 1,
+            None => false,
         }
     }
 }
@@ -80,10 +94,14 @@ impl PartialOrd for Asset {
 
 impl fmt::Display for Asset {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let descriptor = match (self.quantity, self.last_price) {
+        let mut descriptor = match (self.quantity, self.last_price) {
             (Some(q), Some(p)) => format!("{:} x ${:.2}", q, p),
             (_, _) => String::from("unknown price & quantity"),
         };
+        if self.price_is_dated() {
+            let last_known = self.price_obtained.unwrap().naive_local();
+            descriptor = format!("{:}, {:}", descriptor, last_known.date());
+        }
 
         write!(f, "{:}: ${:.2} ({:})", self.name, self.value, descriptor)
     }
@@ -228,6 +246,7 @@ GGGGG,Cash";
             AssetClass::IntlBonds,
             None,
             None,
+            None,
         );
         assert_eq!(
             format!("{}", asset),
@@ -236,13 +255,14 @@ GGGGG,Cash";
     }
 
     #[test]
-    fn asset_formatting() {
+    fn asset_last_known_time_missing() {
         let asset = Asset::new(
             String::from("VTABX"),
             10392.into(),
             AssetClass::IntlBonds,
             Some(Decimal::from(800)),
             Some(Decimal::new(1299, 2)),
+            None,
         );
         assert_eq!(format!("{}", asset), "VTABX: $10392.00 (800 x $12.99)");
     }
