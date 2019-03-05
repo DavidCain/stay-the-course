@@ -2,6 +2,7 @@ extern crate rust_decimal;
 
 use self::rust_decimal::Decimal;
 use assets::{Asset, AssetClass};
+use std::cmp::Ordering;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct AssetAllocation {
@@ -9,6 +10,20 @@ pub struct AssetAllocation {
     pub target_ratio: Decimal,
     underlying_assets: Vec<Asset>,
     future_contribution: Decimal,
+}
+
+impl Ord for AssetAllocation {
+    /// Sort by descending value (largest allocations first)
+    /// Ordering only takes _current_ values into consideration
+    fn cmp(&self, other: &AssetAllocation) -> Ordering {
+        other.current_value().cmp(&self.current_value())
+    }
+}
+
+impl PartialOrd for AssetAllocation {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
 }
 
 impl AssetAllocation {
@@ -339,5 +354,26 @@ mod tests {
         let portfolio = Portfolio::new(does_not_sum);
 
         optimally_allocate(portfolio, 1_000.into());
+    }
+
+    #[test]
+    fn test_should_sort_by_current_allocation_value() {
+        let mut stocks = AssetAllocation::new(AssetClass::USStocks, Decimal::new(50, 2));
+        let mut bonds = AssetAllocation::new(AssetClass::USBonds, Decimal::new(50, 2));
+
+        // We keep $10 in bonds, but plan to contribute nearly $1 million in stocks
+        bonds.add_asset(Asset::new(
+            String::from("VBTLX"),
+            10.into(),
+            AssetClass::USBonds,
+            None,
+            None,
+        ));
+        stocks.add_contribution(999_999.into());
+
+        // Ordering is done by current value.
+        let mut allocations = vec![&stocks, &bonds];
+        allocations.sort();
+        assert_eq!(allocations, vec![&bonds, &stocks]);
     }
 }

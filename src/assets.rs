@@ -3,6 +3,7 @@ extern crate rust_decimal;
 extern crate serde_derive;
 
 use self::rust_decimal::Decimal;
+use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::error::Error;
 use std::fmt;
@@ -58,6 +59,22 @@ impl Asset {
             quantity,
             last_price,
         }
+    }
+}
+
+impl Ord for Asset {
+    /// Sort by ticker name, then by descending value
+    fn cmp(&self, other: &Asset) -> Ordering {
+        match self.name.cmp(&other.name) {
+            Ordering::Equal => other.value.cmp(&self.value),
+            less_or_greater => less_or_greater,
+        }
+    }
+}
+
+impl PartialOrd for Asset {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
 
