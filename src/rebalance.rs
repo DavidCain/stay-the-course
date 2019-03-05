@@ -3,6 +3,7 @@ extern crate rust_decimal;
 use self::rust_decimal::Decimal;
 use assets::{Asset, AssetClass};
 use std::cmp::Ordering;
+use std::fmt;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct AssetAllocation {
@@ -57,7 +58,9 @@ impl AssetAllocation {
         if asset.asset_class != self.asset_class {
             panic!("Asset types must match");
         }
-        self.underlying_assets.push(asset)
+        self.underlying_assets.push(asset);
+        // TODO: Could use a BinaryHeap instead for better efficiency
+        self.underlying_assets.sort();
     }
 
     fn percent_holdings(&self, portfolio_total: Decimal) -> Decimal {
@@ -72,12 +75,40 @@ impl AssetAllocation {
     }
 }
 
+impl fmt::Display for AssetAllocation {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "{:}: ${:.0} (🎯 {:.2}%)",
+            self.asset_class,
+            self.current_value(),
+            self.target_ratio * Decimal::from(100)
+        )?;
+
+        for asset in &self.underlying_assets {
+            write!(f, "\n  - {:}", asset)?;
+        }
+        Ok(())
+    }
+}
+
 pub struct Portfolio {
     allocations: Vec<AssetAllocation>,
 }
 
+impl fmt::Display for Portfolio {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // Display allocations in order, starting from the largest
+        for allocation in (&self.allocations).into_iter() {
+            writeln!(f, "{:}", allocation)?;
+        }
+        write!(f, "Portfolio total: ${:.0}", self.current_value())
+    }
+}
+
 impl Portfolio {
-    pub fn new(allocations: Vec<AssetAllocation>) -> Portfolio {
+    pub fn new(mut allocations: Vec<AssetAllocation>) -> Portfolio {
+        allocations.sort();
         Portfolio { allocations }
     }
 
@@ -123,7 +154,7 @@ impl Portfolio {
                 asset.current_value() / portfolio_total
             };
             println!(
-                " - {:?}: ${:.2}",
+                " - {:}: ${:.2}",
                 asset.asset_class,
                 asset.future_contribution.abs()
             );

@@ -26,7 +26,6 @@ fn get_contribution() -> Decimal {
 }
 
 fn main() {
-    println!("Parsing Gnucash datafile...");
     let book = Book::from_sqlite_file("example.sqlite3");
     //let book = Book::from_xml_file("example.gnucash");
 
@@ -39,10 +38,7 @@ fn main() {
         assets::AssetClassifications::from_csv("data/classified.csv").unwrap();
     let portfolio = book.portfolio_status(asset_classifications, ideal_allocations);
 
-    println!(
-        "\nCurrent portfolio totals ${:.0}",
-        &portfolio.current_value()
-    );
+    println!("{:}\n", portfolio);
     let contribution = get_contribution();
 
     // From those ideal allocations, identify the best way to invest a lump sum

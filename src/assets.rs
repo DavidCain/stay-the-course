@@ -100,6 +100,21 @@ pub enum AssetClass {
     Cash,
 }
 
+impl fmt::Display for AssetClass {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let name = match self {
+            AssetClass::USBonds => "US bonds",
+            AssetClass::USStocks => "US stocks",
+            AssetClass::IntlBonds => "International bonds",
+            AssetClass::IntlStocks => "International stocks",
+            AssetClass::REIT => "REIT",
+            AssetClass::Target => "Target",
+            AssetClass::Cash => "Cash",
+        };
+        write!(f, "{:}", name)
+    }
+}
+
 /// This struct is used in 'data/classified.csv' to map from ticker names to asset classes
 #[derive(Debug, Deserialize, Serialize)]
 struct AssetClassMapping {
