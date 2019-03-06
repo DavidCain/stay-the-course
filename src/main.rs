@@ -11,6 +11,7 @@ mod allocation;
 mod assets;
 mod gnucash;
 mod rebalance;
+mod stats;
 
 use gnucash::Book;
 
@@ -26,7 +27,8 @@ fn get_contribution() -> Decimal {
 }
 
 fn main() {
-    let book = Book::from_sqlite_file("example.sqlite3");
+    let sqlite_file = "example.sqlite3";
+    let book = Book::from_sqlite_file(sqlite_file);
     //let book = Book::from_xml_file("example.gnucash");
 
     // Identify our ideal allocations (percentages by asset class, summing to 100%)
@@ -38,6 +40,11 @@ fn main() {
         assets::AssetClassifications::from_csv("data/classified.csv").unwrap();
     let portfolio = book.portfolio_status(asset_classifications, ideal_allocations);
 
+    let sql_stats = stats::Stats::new(sqlite_file);
+    println!(
+        "After-tax income: ${:.0}",
+        sql_stats.after_tax_income().unwrap()
+    );
     println!("{:}\n", portfolio);
     let contribution = get_contribution();
 
