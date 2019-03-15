@@ -69,11 +69,7 @@ impl Stats {
             Decimal::from(value_num) / Decimal::from(value_denom)
         })?;
 
-        // TODO: On next release of rust_decimal,
-        // Sum should be implemented, which can neatly handle Result
-        let total: Decimal = rows.fold(0.into(), |subtotal, val| subtotal + val.unwrap());
-
-        Ok(total)
+        rows.sum()
     }
 
     /// Sum all transactions under the account and any account's children

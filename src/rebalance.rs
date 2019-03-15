@@ -45,9 +45,7 @@ impl AssetAllocation {
     }
 
     fn current_value(&self) -> Decimal {
-        self.underlying_assets
-            .iter()
-            .fold(0.into(), |total, asset| total + asset.value)
+        self.underlying_assets.iter().map(|asset| asset.value).sum()
     }
 
     fn future_value(&self) -> Decimal {
@@ -113,21 +111,24 @@ impl Portfolio {
     }
 
     pub fn current_value(&self) -> Decimal {
-        self.allocations.iter().fold(0.into(), |total, allocation| {
-            total + &allocation.current_value()
-        })
+        self.allocations
+            .iter()
+            .map(|allocation| allocation.current_value())
+            .sum()
     }
 
     fn future_value(&self) -> Decimal {
-        self.allocations.iter().fold(0.into(), |total, allocation| {
-            total + &allocation.future_value()
-        })
+        self.allocations
+            .iter()
+            .map(|allocation| allocation.future_value())
+            .sum()
     }
 
     fn sum_target_ratios(&self) -> Decimal {
-        self.allocations.iter().fold(0.into(), |total, allocation| {
-            total + &allocation.target_ratio
-        })
+        self.allocations
+            .iter()
+            .map(|allocation| allocation.target_ratio)
+            .sum()
     }
 
     fn num_asset_classes(&self) -> usize {
