@@ -295,6 +295,7 @@ version = "0.1.0"
 dependencies = [
  "chrono 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "csv 1.0.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "num 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "quick-xml 0.13.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "rusqlite 0.16.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rust_decimal 0.11.2 (registry+https://github.com/rust-lang/crates.io-index)",
