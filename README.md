@@ -57,10 +57,11 @@ steady stream of income, and is willing to forego greater returns in exchange
 for stability.
 
 ## Why use this strategy?
-Rebalancing can be expensive. When selling taxable funds, an investor must
-realize capital gains (or losses) in order to move money from one investment to
-another. If shares have not been held for a sufficiently long period of time,
-short-term capital gains may even be realized (at a potentially higher tax rate).
+[Rebalancing][rebalancing] can be expensive. When selling taxable funds, an
+investor must realize capital gains (or losses) in order to move money from one
+investment to another. If shares have not been held for a sufficiently long
+period of time, short-term capital gains may even be realized (at a potentially
+higher tax rate).
 
 For residents of California, capital gains are taxed as normal income. If the
 investor plans to retire in another state, they may desire to postpone the
@@ -102,7 +103,7 @@ investor plains to perform [tax loss harvesting][tax_loss_harvesting].
 
 ## Considerations this tool does not make
 1. No differentiation is made between taxable and tax-advantaged accounts. It is up
-   to the user to manage [efficient fund placement][tax_effecient_placement] and direct
+   to the user to manage [efficient fund placement][tax_efficient_placement] and direct
    funds to the appropriate accounts.
 2. No consideration is made of minimum investments: Investing in a new mutual fund often
    requires a minimum investment, but this tool does not account for that. The included
@@ -134,7 +135,8 @@ This project is very much a work in progress. Some key outstanding tasks:
 [TIPS]: https://en.wikipedia.org/wiki/United_States_Treasury_security#TIPS
 
 [asset_allocation]: https://www.bogleheads.org/wiki/Asset_allocation
+[rebalancing]: https://www.bogleheads.org/wiki/Rebalancing
 [stay_the_course]: https://www.bogleheads.org/blog/bogleheads-principles-stay-the-course/
 [lazy_portfolio]: https://www.bogleheads.org/wiki/Lazy_portfolios#Three_fund_lazy_portfolios
 [tax_loss_harvesting]: https://www.bogleheads.org/wiki/Tax_loss_harvesting
-[tax_effecient_placement]: https://www.bogleheads.org/wiki/Tax-efficient_fund_placement
+[tax_efficient_placement]: https://www.bogleheads.org/wiki/Tax-efficient_fund_placement

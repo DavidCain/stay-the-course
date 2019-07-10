@@ -2,7 +2,7 @@ extern crate rust_decimal;
 
 use self::rust_decimal::Decimal;
 use assets::{Asset, AssetClass};
-use std::cmp::Ordering;
+use std::cmp;
 use std::fmt;
 
 #[derive(Debug, PartialEq, Eq)]
@@ -16,13 +16,13 @@ pub struct AssetAllocation {
 impl Ord for AssetAllocation {
     /// Sort by descending value (largest allocations first)
     /// Ordering only takes _current_ values into consideration
-    fn cmp(&self, other: &AssetAllocation) -> Ordering {
+    fn cmp(&self, other: &AssetAllocation) -> cmp::Ordering {
         other.current_value().cmp(&self.current_value())
     }
 }
 
 impl PartialOrd for AssetAllocation {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+    fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
         Some(self.cmp(other))
     }
 }
@@ -149,22 +149,41 @@ impl Portfolio {
         for asset in self.allocations.iter() {
             let start_ratio: Decimal = if portfolio_total == zero {
                 // If our starting portfolio was empty, we don't want to divide by zero
-                // Treat an asset classs as holding 0% of an empty portfolio
+                // Treat an asset class as holding 0% of an empty portfolio
                 zero
             } else {
                 asset.current_value() / portfolio_total
             };
+            let end_ratio = asset.percent_holdings(new_total);
+
             println!(
                 " - {:}: ${:.2}",
                 asset.asset_class,
                 asset.future_contribution.abs()
             );
-            println!(
-                "   {:.2}% -> {:.2}% (target: {:.2}%)",
+            print!(
+                "   {:.2}% -> {:.2}% (🎯 {:.2}%)",
                 start_ratio * Decimal::from(100),
-                asset.percent_holdings(new_total) * Decimal::from(100),
+                end_ratio * Decimal::from(100),
                 asset.target_ratio * Decimal::from(100),
             );
+
+            // How much the resulting ratio deviates *relative* to the target
+            // Small deviations are to be expected, but high deviations may call for rebalancing
+            // (Absolute deviation should be obvious by just reporting current & target ratios)
+            let start_deviation = Decimal::from(1) - (start_ratio / asset.target_ratio);
+            let end_deviation = Decimal::from(1) - (end_ratio / asset.target_ratio);
+
+            // For sufficiently high deviations, report the starting & ending deviation
+            if cmp::max(start_deviation.abs(), end_deviation.abs()) > Decimal::new(2, 2) {
+                println!(
+                    " Δ [{:.1}% -> {:.1}%]",
+                    start_deviation * Decimal::from(100),
+                    end_deviation * Decimal::from(100),
+                );
+            } else {
+                println!();
+            }
         }
     }
 }
