@@ -60,8 +60,8 @@ Contribute the following amounts:
 
 ### Sample GnuCash accounting records
 
-`example.sqlite3` and `example.gnucash` are included sample files that may be
-opened with [GnuCash 3][gnucash]. The transactions, security prices, and
+In `example/` are two (identical) sample files in XML and sqlite3 format. Each
+may be opened with [GnuCash 3][gnucash]. The transactions, security prices, and
 account balances contained within are the basis of rebalancing logic:
 
 ![GnuCash user interface for included sample files][img-gnucash-interface]

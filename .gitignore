@@ -1,3 +1,5 @@
+/config.toml
+
 /target/
 **/*.rs.bk
 *.gnucash.*LCK

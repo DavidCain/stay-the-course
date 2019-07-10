@@ -1,0 +1,6 @@
+[user]
+birthday = '1972-07-12'
+
+[gnucash]
+path_to_book = 'my_books.gnucash'
+file_format = 'sqlite3'

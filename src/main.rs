@@ -12,10 +12,12 @@ use std::io;
 mod allocation;
 mod assets;
 mod compounding;
+mod config;
 mod gnucash;
 mod rebalance;
 mod stats;
 
+use config::Config;
 use gnucash::Book;
 
 fn get_contribution() -> Decimal {
@@ -67,12 +69,11 @@ fn summarize_retirement_prospects(birthday: NaiveDate, portfolio_total: Decimal,
 }
 
 fn main() {
-    let sqlite_file = "example.sqlite3";
-    let book = Book::from_sqlite_file(sqlite_file);
-    //let book = Book::from_xml_file("example.gnucash");
+    let conf = Config::from_file("config.toml");
+    let book = Book::from_config(&conf);
 
     // Identify our ideal allocations (percentages by asset class, summing to 100%)
-    let birthday = NaiveDate::from_ymd(1985, 1, 1);
+    let birthday = conf.user_birthday();
     let bond_allocation = allocation::bond_allocation(birthday, 120);
     let ideal_allocations = allocation::core_four(bond_allocation);
 
@@ -84,15 +85,17 @@ fn main() {
 
     summarize_retirement_prospects(birthday, portfolio.current_value(), 0.07);
 
-    let sql_stats = stats::Stats::new(sqlite_file);
-    let after_tax = sql_stats.after_tax_income().unwrap();
-    let charity = sql_stats.charitable_giving().unwrap();
-    println!("After-tax income: ${:.0}", after_tax);
-    println!(
-        "Charitable giving: ${:.0} ({:.0}% of after-tax income)",
-        charity,
-        (charity / after_tax) * Decimal::from(100)
-    );
+    if conf.gnucash.file_format == "sqlite3" {
+        let sql_stats = stats::Stats::new(&conf.gnucash.path_to_book);
+        let after_tax = sql_stats.after_tax_income().unwrap();
+        let charity = sql_stats.charitable_giving().unwrap();
+        println!("After-tax income: ${:.0}", after_tax);
+        println!(
+            "Charitable giving: ${:.0} ({:.0}% of after-tax income)",
+            charity,
+            (charity / after_tax) * Decimal::from(100)
+        );
+    }
 
     let contribution = get_contribution();
 

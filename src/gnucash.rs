@@ -15,6 +15,7 @@ use std::io::BufReader;
 use std::str::FromStr;
 
 use assets;
+use config::Config;
 use rebalance::{AssetAllocation, Portfolio};
 
 static GNUCASH_DT_FORMAT: &str = "%Y-%m-%d %H:%M:%S %z";
@@ -668,6 +669,17 @@ impl Book {
         Book {
             pricedb: PriceDatabase::new(),
             account_by_guid: HashMap::new(),
+        }
+    }
+
+    pub fn from_config(conf: &Config) -> Book {
+        let path = &conf.gnucash.path_to_book;
+        if conf.gnucash.file_format == "sqlite3" {
+            return Book::from_sqlite_file(path);
+        } else if conf.gnucash.file_format == "xml" {
+            return Book::from_xml_file(path);
+        } else {
+            panic!("Other file formats not supported at this time");
         }
     }
 
