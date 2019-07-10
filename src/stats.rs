@@ -120,4 +120,10 @@ impl Stats {
     pub fn after_tax_income(&self) -> rusqlite::Result<Decimal> {
         Ok(self.income_before_taxes()? - self.taxes_paid()?)
     }
+
+    /// Sum value of all contributions to charity
+    pub fn charitable_giving(&self) -> rusqlite::Result<Decimal> {
+        let charity_guid = self.top_level_expense_account("Charity")?;
+        self.sum_all_transactions_in(&charity_guid)
+    }
 }

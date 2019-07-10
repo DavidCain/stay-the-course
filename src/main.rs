@@ -85,9 +85,13 @@ fn main() {
     summarize_retirement_prospects(birthday, portfolio.current_value(), 0.07);
 
     let sql_stats = stats::Stats::new(sqlite_file);
+    let after_tax = sql_stats.after_tax_income().unwrap();
+    let charity = sql_stats.charitable_giving().unwrap();
+    println!("After-tax income: ${:.0}", after_tax);
     println!(
-        "After-tax income: ${:.0}",
-        sql_stats.after_tax_income().unwrap()
+        "Charitable giving: ${:.0} ({:.0}% of after-tax income)",
+        charity,
+        (charity / after_tax) * Decimal::from(100)
     );
 
     let contribution = get_contribution();
