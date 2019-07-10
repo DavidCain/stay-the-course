@@ -18,6 +18,54 @@ its desired ratio of the whole portfolio.
 Broadly, this tool provides a means of ["staying the course"][stay_the_course]
 through regular contributions into the right mutual funds.
 
+## Demo
+Just clone and `cargo run` to see a demonstration with a real GnuCash database:
+
+```
+$ git clone git@github.com:DavidCain/stay-the-course.git
+$ cd stay-the-course
+$ cargo run
+US stocks: $10032 (🎯 42.68%)
+  - FZROX: $5120.56 (485.3619 x $10.55)
+  - VTSAX: $4911.94 (66.5305 x $73.83)
+International stocks: $7749 (🎯 34.14%)
+  - VTIAX: $7749.70 (273.7445 x $28.31)
+US bonds: $3393 (🎯 14.63%)
+  - VBTLX: $3393.63 (311.0576 x $10.91)
+REIT: $3330 (🎯 8.53%)
+  - VGSLX: $3330.72 (26.1438 x $127.40)
+Portfolio total: $24506
+
+Worth at retirement (Assuming 7% growth):
+ - 34: $24506  SWR: $980
+ - 50: $69858  SWR: $2794
+ - 55: $97975  SWR: $3919
+ - 60: $137434  SWR: $5497
+ - 65: $192750  SWR: $7710
+
+After-tax income: $49700
+Charitable giving: $5000 (10% of after-tax income)
+How much to contribute or withdraw?
+2000
+Contribute the following amounts:
+ - International stocks: $903.07
+   31.62% -> 32.64% (🎯 34.14%) Δ [7.3% -> 4.4%]
+ - US bonds: $313.46
+   13.84% -> 13.98% (🎯 14.63%) Δ [5.3% -> 4.4%]
+ - US stocks: $783.46
+   40.93% -> 40.80% (🎯 42.68%) Δ [4.0% -> 4.4%]
+ - REIT: $0.00
+   13.59% -> 12.56% (🎯 8.53%) Δ [-59.2% -> -47.1%]
+```
+
+### Sample GnuCash accounting records
+
+`example.sqlite3` and `example.gnucash` are included sample files that may be
+opened with [GnuCash 3][gnucash]. The transactions, security prices, and
+account balances contained within are the basis of rebalancing logic:
+
+![GnuCash user interface for included sample files][img-gnucash-interface]
+
 ## How it works
 The tool accepts a few key inputs:
 
@@ -140,3 +188,6 @@ This project is very much a work in progress. Some key outstanding tasks:
 [lazy_portfolio]: https://www.bogleheads.org/wiki/Lazy_portfolios#Three_fund_lazy_portfolios
 [tax_loss_harvesting]: https://www.bogleheads.org/wiki/Tax_loss_harvesting
 [tax_efficient_placement]: https://www.bogleheads.org/wiki/Tax-efficient_fund_placement
+
+
+[img-gnucash-interface]: https://github.com/DavidCain/stay-the-course/blob/master/images/gnucash_interface.png
