@@ -72,7 +72,7 @@ fn main() {
     //let book = Book::from_xml_file("example.gnucash");
 
     // Identify our ideal allocations (percentages by asset class, summing to 100%)
-    let birthday = NaiveDate::from_ymd(1960, 1, 1);
+    let birthday = NaiveDate::from_ymd(1985, 1, 1);
     let bond_allocation = allocation::bond_allocation(birthday, 120);
     let ideal_allocations = allocation::core_four(bond_allocation);
 
