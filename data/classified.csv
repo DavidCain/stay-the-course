@@ -1,8 +1,9 @@
 ticker_name,asset_class,name
 VTSAX,USStocks,"Vanguard Total Stock Market Index Fund Admiral Shares"
 VFIAX,USStocks,"Vanguard 500 Index Fund Admiral Shares"
-FZROX,USStocks,"Fidelity Total Market Index Fund"
-FZILX,IntlStocks,"Fidelity International Index Fund"
+FSKAX,USStocks,"Fidelity Total Market Index Fund"
+FZROX,USStocks,"Fidelity ZERO Total Market Index Fund"
+FZILX,IntlStocks,"Fidelity ZERO International Index Fund"
 VTIAX,IntlStocks,"Vanguard Total International Stock Index Fund Admiral Shares"
 VBTLX,USBonds,"Vanguard Total Bond Market Index Fund Admiral Shares"
 VGSLX,REIT,"Vanguard Real Estate Index Fund Admiral Shares"
