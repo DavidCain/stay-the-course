@@ -4,12 +4,14 @@ version = "0.1.0"
 authors = ["David Cain <davidjosephcain@gmail.com>"]
 
 [dependencies]
-chrono = "^0.4"
+chrono = { version = "^0.4", features = ["serde"] }
 csv = "^1"
+lexpr = "^0.2.4"
 num = "^0.2.0"
 quick-xml = "^0.13.1"
 rusqlite = "^0.16.0"
 rust_decimal = "^1"
 serde = "^1"
 serde_derive = "^1"
+serde-lexpr = "^0.1.1"
 toml = "^0.5"

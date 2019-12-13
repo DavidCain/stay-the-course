@@ -14,6 +14,7 @@ mod assets;
 mod compounding;
 mod config;
 mod gnucash;
+mod quote;
 mod rebalance;
 mod stats;
 

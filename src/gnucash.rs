@@ -16,6 +16,7 @@ use std::str::FromStr;
 
 use assets;
 use config::Config;
+use quote;
 use rebalance::{AssetAllocation, Portfolio};
 
 static GNUCASH_DT_FORMAT: &str = "%Y-%m-%d %H:%M:%S %z";
@@ -140,9 +141,13 @@ impl PriceDatabase {
         self.last_price_by_commodity.insert(name, price);
     }
 
+    fn last_commodity_price(&self, commodity: &Commodity) -> Option<&Price> {
+        self.last_price_by_commodity.get(&commodity.id)
+    }
+
     fn last_price_for(&self, account: &Account) -> Option<&Price> {
         match &account.commodity {
-            Some(commodity) => self.last_price_by_commodity.get(&commodity.id),
+            Some(commodity) => self.last_commodity_price(&commodity),
             None => panic!("Can't fetch last price of an account without a commodity"),
         }
     }
@@ -220,10 +225,10 @@ impl PriceDatabase {
 }
 
 #[derive(Debug)]
-struct Commodity {
-    id: String,            // "VTSAX
-    space: Option<String>, // "FUND", "CURRENCY", etc.
-    name: String,          // "Vanguard Total Stock Market Index Fund"
+pub struct Commodity {
+    pub id: String,            // "VTSAX
+    pub space: Option<String>, // "FUND", "CURRENCY", etc.
+    pub name: String,          // "Vanguard Total Stock Market Index Fund"
 }
 
 impl Commodity {
@@ -761,6 +766,68 @@ impl Book {
         Portfolio::new(by_asset_class.into_iter().map(|(_, v)| v).collect())
     }
 
+    fn alphavantage_commodities(conn: &Connection) -> Vec<Commodity> {
+        let mut stmt = conn
+            .prepare(
+                "SELECT mnemonic, namespace, fullname
+                   FROM commodities
+                  WHERE namespace = 'FUND'
+                    AND quote_flag
+                    AND quote_source = 'alphavantage'
+                  ",
+            )
+            .expect("Invalid SQL");
+
+        let commodities = stmt
+            .query_map(NO_PARAMS, |row| {
+                Commodity::new(row.get(0), row.get(1), row.get(2))
+            })
+            .unwrap()
+            .map(|ret| ret.unwrap())
+            .collect();
+
+        commodities
+    }
+
+    fn commodities_needing_quotes(&self, conn: &Connection) -> Vec<Commodity> {
+        let now = Local::now();
+
+        Book::alphavantage_commodities(conn)
+            .into_iter()
+            .filter(|commodity| {
+                let price = self.pricedb.last_commodity_price(&commodity);
+                match price {
+                    // NOTE: It could be the weekend or a trading holiday
+                    // Trying to get a quote might be fruitless, but that's okay.
+                    // (We can get a quote, see that if it's stale, then try again tomorrow)
+                    Some(price) => {
+                        let days = (now - price.time).num_days().abs();
+                        // println!("Days without quote for {:}: {:}", commodity.id, days);
+                        days > 1
+                    }
+                    // If no price was found, we definitely need a new quote.
+                    None => true,
+                }
+            })
+            .collect()
+    }
+
+    pub fn update_commodities(&self, conn: &Connection) {
+        // TODO: Time out after five?
+        for commodity in self.commodities_needing_quotes(conn) {
+            let quote = quote::FinanceQuote::fetch_quote(&commodity);
+            let price = self.pricedb.last_commodity_price(&commodity);
+
+            let should_update = match price {
+                // Update if the quote is more current, or it's the same date but different info
+                Some(price) => {
+                    price.time.naive_local().date() < quote.time.date() || price.value != quote.last
+                }
+                None => false,
+            };
+        }
+    }
+
     fn investment_accounts(conn: &Connection) -> Vec<Account> {
         let mut stmt = conn
             .prepare(
@@ -801,6 +868,7 @@ impl GnucashFromSqlite for Book {
         }
 
         book.pricedb.populate_from_sqlite(conn);
+        book.update_commodities(conn);
         book
     }
 }

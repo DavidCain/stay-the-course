@@ -1,7 +1,6 @@
 extern crate chrono;
 extern crate csv;
 extern crate rust_decimal;
-extern crate serde_derive;
 
 use self::chrono::{DateTime, Local};
 use self::rust_decimal::Decimal;
