@@ -21,6 +21,7 @@ impl User {
 pub struct GnuCash {
     pub path_to_book: String,
     pub file_format: String,
+    pub update_prices: bool,
 }
 
 #[derive(Deserialize)]
@@ -39,6 +40,7 @@ impl Config {
             gnucash: GnuCash {
                 path_to_book: String::from("example.sqlite3"),
                 file_format: String::from("sqlite3"),
+                update_prices: true,
             },
         }
     }
@@ -90,6 +92,7 @@ mod tests {
         assert_eq!(conf.user_birthday(), NaiveDate::from_ymd(1972, 7, 12));
         assert_eq!(&conf.gnucash.path_to_book, "example/sqlite3.gnucash");
         assert_eq!(&conf.gnucash.file_format, "sqlite3");
+        assert_eq!(conf.gnucash.update_prices, true);
     }
 
     #[test]
@@ -98,5 +101,6 @@ mod tests {
         assert_eq!(&conf.user.birthday, "1985-01-01");
         assert_eq!(&conf.gnucash.path_to_book, "example.sqlite3");
         assert_eq!(&conf.gnucash.file_format, "sqlite3");
+        assert_eq!(conf.gnucash.update_prices, true);
     }
 }

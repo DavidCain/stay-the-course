@@ -27,7 +27,7 @@ trait GnucashFromXML {
 }
 
 trait GnucashFromSqlite {
-    fn from_sqlite(&Connection) -> Self;
+    fn from_sqlite(&Connection, conf: &Config) -> Self;
 }
 
 #[derive(Debug)]
@@ -763,7 +763,7 @@ impl Book {
     pub fn from_config(conf: &Config) -> Book {
         let path = &conf.gnucash.path_to_book;
         if conf.gnucash.file_format == "sqlite3" {
-            return Book::from_sqlite_file(path);
+            return Book::from_sqlite_file(path, conf);
         } else if conf.gnucash.file_format == "xml" {
             return Book::from_xml_file(path);
         } else {
@@ -771,9 +771,9 @@ impl Book {
         }
     }
 
-    pub fn from_sqlite_file(filename: &str) -> Book {
+    pub fn from_sqlite_file(filename: &str, conf: &Config) -> Book {
         let conn = Connection::open(filename).expect("Could not open file");
-        Book::from_sqlite(&conn)
+        Book::from_sqlite(&conn, conf)
     }
 
     #[allow(dead_code)]
@@ -989,7 +989,7 @@ impl Book {
 }
 
 impl GnucashFromSqlite for Book {
-    fn from_sqlite(conn: &Connection) -> Book {
+    fn from_sqlite(conn: &Connection, conf: &Config) -> Book {
         let mut book = Book::new();
 
         for mut account in Book::get_investment_accounts(conn) {
