@@ -164,10 +164,10 @@ impl PriceDatabase {
                              max(p.date),
 
                              -- Commodity for which the price is being quoted
-                             from_c.mnemonic, from_c.namespace, from_c.fullname,
+                             from_c.guid, from_c.mnemonic, from_c.namespace, from_c.fullname,
 
                              -- Commodity in which the price is defined (generally a currency)
-                             to_c.mnemonic, to_c.namespace, to_c.fullname
+                             to_c.guid, to_c.mnemonic, to_c.namespace, to_c.fullname
                         FROM prices p
                              JOIN commodities from_c ON p.commodity_guid = from_c.guid
                              JOIN commodities to_c   ON p.currency_guid = to_c.guid
@@ -186,8 +186,18 @@ impl PriceDatabase {
                 let price = Price {
                     value,
                     time: utc_to_datetime(&dt),
-                    from_commodity: Commodity::new(row.get(3), row.get(4), row.get(5)),
-                    to_commodity: Commodity::new(row.get(6), row.get(7), row.get(8)),
+                    from_commodity: Commodity::new(
+                        Some(row.get(3)),
+                        row.get(4),
+                        row.get(5),
+                        row.get(6),
+                    ),
+                    to_commodity: Commodity::new(
+                        Some(row.get(7)),
+                        row.get(8),
+                        row.get(9),
+                        row.get(10),
+                    ),
                 };
                 price
             })
@@ -226,15 +236,22 @@ impl PriceDatabase {
 
 #[derive(Debug)]
 pub struct Commodity {
-    pub id: String,            // "VTSAX
+    pub guid: Option<String>, // a UUID lowercased with no hypens, absent from XML
+    pub id: String,           // "VTSAX"
     pub space: Option<String>, // "FUND", "CURRENCY", etc.
-    pub name: String,          // "Vanguard Total Stock Market Index Fund"
+    pub name: String,         // "Vanguard Total Stock Market Index Fund"
 }
 
 impl Commodity {
     // Initialize with a potentially empty name
-    fn new(id: String, space: Option<String>, name: Option<String>) -> Commodity {
+    fn new(
+        guid: Option<String>,
+        id: String,
+        space: Option<String>,
+        name: Option<String>,
+    ) -> Commodity {
         Commodity {
+            guid,
             space,
             // Name can be missing. Fall back to an ID if we lack a name
             name: match name {
@@ -292,7 +309,7 @@ impl GnucashFromXML for Commodity {
         }
 
         match id {
-            Some(id) => Commodity::new(id, space, name),
+            Some(id) => Commodity::new(None, id, space, name),
             _ => panic!("Commodities must have an ID!"),
         }
     }
@@ -762,7 +779,7 @@ impl Book {
     fn alphavantage_commodities(conn: &Connection) -> Vec<Commodity> {
         let mut stmt = conn
             .prepare(
-                "SELECT mnemonic, namespace, fullname
+                "SELECT guid, mnemonic, namespace, fullname
                    FROM commodities
                   WHERE namespace = 'FUND'
                     AND quote_flag
@@ -773,7 +790,7 @@ impl Book {
 
         let commodities = stmt
             .query_map(NO_PARAMS, |row| {
-                Commodity::new(row.get(0), row.get(1), row.get(2))
+                Commodity::new(Some(row.get(0)), row.get(1), row.get(2), row.get(3))
             })
             .unwrap()
             .map(|ret| ret.unwrap())
@@ -826,7 +843,7 @@ impl Book {
             .prepare(
                 "SELECT a.guid, a.name,
                         -- Commodity for the account
-                        c.mnemonic, c.namespace, c.fullname
+                        c.guid, c.mnemonic, c.namespace, c.fullname
                    FROM accounts a
                         JOIN commodities c ON a.commodity_guid = c.guid
                   WHERE c.namespace = 'FUND'
@@ -836,11 +853,12 @@ impl Book {
 
         let investment_accounts = stmt
             .query_map(NO_PARAMS, |row| {
-                let guid = row.get(0);
-                let name = row.get(1);
-                let commodity = Commodity::new(row.get(2), row.get(3), row.get(4));
+                let account_guid = row.get(0);
+                let account_name = row.get(1);
+                let commodity =
+                    Commodity::new(Some(row.get(2)), row.get(3), row.get(4), row.get(5));
 
-                Account::new(guid, name, Some(commodity))
+                Account::new(account_guid, account_name, Some(commodity))
             })
             .unwrap()
             .map(|ret| ret.unwrap())
