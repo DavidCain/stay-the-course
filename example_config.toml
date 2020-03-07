@@ -2,5 +2,5 @@
 birthday = '1972-07-12'
 
 [gnucash]
-path_to_book = 'my_books.gnucash'
+path_to_book = 'example/sqlite3.gnucash'
 file_format = 'sqlite3'

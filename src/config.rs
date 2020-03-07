@@ -88,7 +88,7 @@ mod tests {
     fn test_parse_from_toml() {
         let conf = Config::from_file("example_config.toml");
         assert_eq!(conf.user_birthday(), NaiveDate::from_ymd(1972, 7, 12));
-        assert_eq!(&conf.gnucash.path_to_book, "my_books.gnucash");
+        assert_eq!(&conf.gnucash.path_to_book, "example/sqlite3.gnucash");
         assert_eq!(&conf.gnucash.file_format, "sqlite3");
     }
 
