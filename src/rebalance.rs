@@ -189,7 +189,7 @@ impl Portfolio {
 }
 
 fn proportionally_allocate(mut portfolio: Portfolio, contribution: Decimal) -> Portfolio {
-    for mut asset in portfolio.allocations.iter_mut() {
+    for asset in portfolio.allocations.iter_mut() {
         let amount = asset.target_ratio * contribution;
         asset.add_contribution(amount);
     }

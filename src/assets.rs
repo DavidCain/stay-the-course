@@ -155,14 +155,14 @@ impl AssetClassifications {
         self.mapping.insert(name, asset_class);
     }
 
-    pub fn from_csv(path: &str) -> Result<AssetClassifications, Box<Error>> {
+    pub fn from_csv(path: &str) -> Result<AssetClassifications, Box<dyn Error>> {
         let rdr = csv::Reader::from_path(path)?;
         AssetClassifications::from_reader(rdr)
     }
 
     fn from_reader<R: io::Read>(
         mut rdr: csv::Reader<R>,
-    ) -> Result<AssetClassifications, Box<Error>> {
+    ) -> Result<AssetClassifications, Box<dyn Error>> {
         let mut asset_classifications = AssetClassifications::new();
         for result in rdr.deserialize() {
             let asset_class: AssetClassMapping = result?;
