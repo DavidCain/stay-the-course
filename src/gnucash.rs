@@ -152,9 +152,9 @@ impl PriceDatabase {
         }
     }
 
-    fn populate_from_sqlite(&mut self, conn: &Connection) {
-        let mut stmt = conn
-            .prepare("-- NOTE: This query uses a quirk of SQLite that does not comply with the SQL standard
+    fn populate_from_sqlite(&mut self, conn: &Connection) -> rusqlite::Result<()> {
+        let mut stmt = conn.prepare(
+            "-- NOTE: This query uses a quirk of SQLite that does not comply with the SQL standard
                       -- (SQLite lets you `GROUP BY` columns, then select non-aggregate columns)
                       -- It's handy here, but it may not be portable to other SQL implementations
                       SELECT -- Fraction which forms the actual price
@@ -172,39 +172,38 @@ impl PriceDatabase {
                              JOIN commodities from_c ON p.commodity_guid = from_c.guid
                              JOIN commodities to_c   ON p.currency_guid = to_c.guid
                        WHERE from_c.namespace = 'FUND'
-                       GROUP BY p.commodity_guid;")
-            .expect("Invalid SQL");
+                       GROUP BY p.commodity_guid;",
+        )?;
 
-        let price_iter = stmt
-            .query_map(NO_PARAMS, |row| {
-                let num: i64 = row.get(0);
-                let denom: i64 = row.get(1);
-                let value: Decimal = Decimal::from(num) / Decimal::from(denom);
+        let price_iter = stmt.query_map(NO_PARAMS, |row| {
+            let num: i64 = row.get(0)?;
+            let denom: i64 = row.get(1)?;
+            let value: Decimal = Decimal::from(num) / Decimal::from(denom);
 
-                let dt: String = row.get(2);
+            let dt: String = row.get(2)?;
 
-                let price = Price {
-                    value,
-                    time: utc_to_datetime(&dt),
-                    from_commodity: Commodity::new(
-                        Some(row.get(3)),
-                        row.get(4),
-                        row.get(5),
-                        row.get(6),
-                    ),
-                    to_commodity: Commodity::new(
-                        Some(row.get(7)),
-                        row.get(8),
-                        row.get(9),
-                        row.get(10),
-                    ),
-                };
-                price
-            })
-            .expect("Could not iterate over SQL results");
+            let price = Price {
+                value,
+                time: utc_to_datetime(&dt),
+                from_commodity: Commodity::new(
+                    Some(row.get(3)?),
+                    row.get(4)?,
+                    row.get(5)?,
+                    row.get(6)?,
+                ),
+                to_commodity: Commodity::new(
+                    Some(row.get(7)?),
+                    row.get(8)?,
+                    row.get(9)?,
+                    row.get(10)?,
+                ),
+            };
+            Ok(price)
+        })?;
         for price in price_iter {
             self.add_price(price.unwrap());
         }
+        Ok(())
     }
 
     fn populate_from_xml(&mut self, reader: &mut Reader<BufReader<File>>) {
@@ -560,41 +559,39 @@ impl Account {
         }
     }
 
-    fn read_splits_from_sqlite(&mut self, conn: &Connection) {
-        let mut stmt = conn
-            .prepare(
-                "SELECT account_guid,
+    fn read_splits_from_sqlite(&mut self, conn: &Connection) -> rusqlite::Result<()> {
+        let mut stmt = conn.prepare(
+            "SELECT account_guid,
                         value_num, value_denom,
                         quantity_num, quantity_denom
                    FROM splits
                   WHERE account_guid = $1
                   ",
-            )
-            .expect("Invalid SQL");
+        )?;
 
-        let splits = stmt
-            .query_map([&self.guid].iter(), |row| {
-                let account: String = row.get(0);
+        let splits = stmt.query_map([&self.guid].iter(), |row| {
+            let account: String = row.get(0)?;
 
-                let value_num: i64 = row.get(1);
-                let value_denom: i64 = row.get(2);
-                let value: Decimal = Decimal::from(value_num) / Decimal::from(value_denom);
+            let value_num: i64 = row.get(1)?;
+            let value_denom: i64 = row.get(2)?;
+            let value: Decimal = Decimal::from(value_num) / Decimal::from(value_denom);
 
-                let quantity_num: i64 = row.get(3);
-                let quantity_denom: i64 = row.get(4);
-                let quantity: Decimal = Decimal::from(quantity_num) / Decimal::from(quantity_denom);
+            let quantity_num: i64 = row.get(3)?;
+            let quantity_denom: i64 = row.get(4)?;
+            let quantity: Decimal = Decimal::from(quantity_num) / Decimal::from(quantity_denom);
 
-                let split = ComputedSplit {
-                    value,
-                    quantity,
-                    account,
-                };
-                split
-            })
-            .unwrap()
-            .map(|ret| Split::Computed(ret.unwrap()))
+            let split = ComputedSplit {
+                value,
+                quantity,
+                account,
+            };
+            Ok(split)
+        })?;
+
+        self.splits = splits
+            .map(|split| Split::Computed(split.unwrap()))
             .collect();
-        self.splits = splits;
+        Ok(())
     }
 
     fn is_investment(&self) -> bool {
@@ -776,7 +773,7 @@ impl Book {
         Portfolio::new(by_asset_class.into_iter().map(|(_, v)| v).collect())
     }
 
-    fn alphavantage_commodities(conn: &Connection) -> Vec<Commodity> {
+    fn alphavantage_commodities(conn: &Connection) -> rusqlite::Result<Vec<Commodity>> {
         let mut stmt = conn
             .prepare(
                 "SELECT guid, mnemonic, namespace, fullname
@@ -788,21 +785,23 @@ impl Book {
             )
             .expect("Invalid SQL");
 
-        let commodities = stmt
-            .query_map(NO_PARAMS, |row| {
-                Commodity::new(Some(row.get(0)), row.get(1), row.get(2), row.get(3))
-            })
-            .unwrap()
-            .map(|ret| ret.unwrap())
-            .collect();
+        let commodities = stmt.query_map(NO_PARAMS, |row| {
+            Ok(Commodity::new(
+                Some(row.get(0)?),
+                row.get(1)?,
+                row.get(2)?,
+                row.get(3)?,
+            ))
+        })?;
 
-        commodities
+        Ok(commodities.map(|ret| ret.unwrap()).collect())
     }
 
     fn commodities_needing_quotes(&self, conn: &Connection) -> Vec<Commodity> {
         let now = Local::now();
 
         Book::alphavantage_commodities(conn)
+            .unwrap()
             .into_iter()
             .filter(|commodity| {
                 let price = self.pricedb.last_commodity_price(&commodity);
@@ -853,12 +852,12 @@ impl Book {
 
         let investment_accounts = stmt
             .query_map(NO_PARAMS, |row| {
-                let account_guid = row.get(0);
-                let account_name = row.get(1);
+                let account_guid = row.get(0)?;
+                let account_name = row.get(1)?;
                 let commodity =
-                    Commodity::new(Some(row.get(2)), row.get(3), row.get(4), row.get(5));
+                    Commodity::new(Some(row.get(2)?), row.get(3)?, row.get(4)?, row.get(5)?);
 
-                Account::new(account_guid, account_name, Some(commodity))
+                Ok(Account::new(account_guid, account_name, Some(commodity)))
             })
             .unwrap()
             .map(|ret| ret.unwrap())
@@ -874,11 +873,11 @@ impl GnucashFromSqlite for Book {
 
         for mut account in Book::investment_accounts(conn) {
             assert!(account.is_investment());
-            account.read_splits_from_sqlite(conn);
+            account.read_splits_from_sqlite(conn).unwrap();
             book.add_investment(account);
         }
 
-        book.pricedb.populate_from_sqlite(conn);
+        book.pricedb.populate_from_sqlite(conn).unwrap();
         book.update_commodities(conn);
         book
     }

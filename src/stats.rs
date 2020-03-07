@@ -40,8 +40,8 @@ impl Stats {
         );
         let mut stmt = (&self.conn).prepare(&sql)?;
         let mut guids = stmt.query_map(NO_PARAMS, |row| {
-            let taxes_guid: String = row.get(0);
-            taxes_guid
+            let taxes_guid: String = row.get(0)?;
+            Ok(taxes_guid)
         })?;
         guids.next().expect("Can't find Expenses account!")
     }
@@ -64,9 +64,9 @@ impl Stats {
 
         let mut stmt = (&self.conn).prepare(&sql)?;
         let rows = stmt.query_map(NO_PARAMS, |row| {
-            let value_num: i64 = row.get(0);
-            let value_denom: i64 = row.get(1);
-            Decimal::from(value_num) / Decimal::from(value_denom)
+            let value_num: i64 = row.get(0)?;
+            let value_denom: i64 = row.get(1)?;
+            Ok(Decimal::from(value_num) / Decimal::from(value_denom))
         })?;
 
         rows.sum()
