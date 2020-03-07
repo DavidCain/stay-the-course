@@ -13,6 +13,7 @@ mod allocation;
 mod assets;
 mod compounding;
 mod config;
+mod decutil;
 mod gnucash;
 mod quote;
 mod rebalance;

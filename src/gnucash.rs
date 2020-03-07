@@ -12,10 +12,10 @@ use std::collections::HashMap;
 use std::convert::Into;
 use std::fs::File;
 use std::io::BufReader;
-use std::str::FromStr;
 
 use assets;
 use config::Config;
+use decutil::frac_to_quantity;
 use quote;
 use rebalance::{AssetAllocation, Portfolio};
 
@@ -655,13 +655,6 @@ impl GnucashFromXML for Account {
 
         Account::new(guid, name, commodity)
     }
-}
-
-fn frac_to_quantity(fraction: &str) -> Decimal {
-    let mut components = fraction.split("/");
-    let numerator = components.next().unwrap();
-    let denomenator = components.next().unwrap();
-    Decimal::from_str(numerator).unwrap() / Decimal::from_str(denomenator).unwrap()
 }
 
 pub struct Book {
