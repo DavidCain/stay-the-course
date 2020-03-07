@@ -2,38 +2,25 @@ extern crate chrono;
 extern crate quick_xml;
 extern crate rusqlite;
 extern crate rust_decimal;
+extern crate uuid;
 
-use self::chrono::{DateTime, Local, NaiveDateTime, Utc};
+use self::chrono::{DateTime, Local};
 use self::quick_xml::events::Event;
 use self::quick_xml::Reader;
-use self::rusqlite::{Connection, NO_PARAMS};
+use self::rusqlite::{params, Connection, NO_PARAMS};
 use self::rust_decimal::Decimal;
 use std::collections::HashMap;
 use std::convert::Into;
 use std::fs::File;
+use std::io::prelude::*;
 use std::io::BufReader;
 
 use assets;
 use config::Config;
-use decutil::frac_to_quantity;
+use dateutil;
+use decutil;
 use quote;
 use rebalance::{AssetAllocation, Portfolio};
-
-static GNUCASH_DT_FORMAT: &str = "%Y-%m-%d %H:%M:%S %z";
-static GNUCASH_UTC_DT_FORMAT: &str = "%Y-%m-%d %H:%M:%S";
-
-// In XML, datetimes are given with local TZ in them
-fn to_datetime(datestring: &str) -> DateTime<Local> {
-    let dt = DateTime::parse_from_str(datestring, GNUCASH_DT_FORMAT).unwrap();
-    dt.with_timezone(&Local)
-}
-
-// In SQLite, all datetimes are UTC
-fn utc_to_datetime(datestring: &str) -> DateTime<Local> {
-    let dt = NaiveDateTime::parse_from_str(datestring, GNUCASH_UTC_DT_FORMAT).unwrap();
-    let utc = DateTime::<Utc>::from_utc(dt, Utc);
-    utc.with_timezone(&Local)
-}
 
 trait GnucashFromXML {
     fn from_xml(&mut Reader<BufReader<File>>) -> Self;
@@ -41,6 +28,11 @@ trait GnucashFromXML {
 
 trait GnucashFromSqlite {
     fn from_sqlite(&Connection) -> Self;
+}
+
+#[derive(Debug)]
+pub struct CommodityError {
+    pub commodity_id: String,
 }
 
 #[derive(Debug)]
@@ -61,6 +53,25 @@ impl Price {
 
     fn commodity_name(&self) -> &str {
         self.from_commodity.id.as_ref()
+    }
+
+    fn at_new_quoted_value(&self, q: &quote::Quote) -> Price {
+        Price {
+            from_commodity: self.from_commodity.clone(),
+            to_commodity: self.to_commodity.clone(),
+            value: q.last.clone(),
+            time: q.time.clone(),
+        }
+    }
+
+    /**
+     * Return if this quote has information not recorded in the latest price.
+     *
+     * Even if the value differs from what we have in the price, we should
+     * still write it to the database anyway - GnuCash can pick which it prefers.
+     */
+    fn should_update_with_quote(&self, q: &quote::Quote) -> bool {
+        self.time.date() < q.time.date() || (self.value != q.last)
     }
 }
 
@@ -84,11 +95,11 @@ impl GnucashFromXML for Price {
                     }
                     b"ts:date" => {
                         let text = reader.read_text(e.name(), &mut Vec::new()).unwrap();
-                        found_ts = Some(to_datetime(&text));
+                        found_ts = Some(dateutil::localize_from_dt_with_tz(&text).unwrap());
                     }
                     b"price:value" => {
                         let frac = reader.read_text(e.name(), &mut Vec::new()).unwrap();
-                        value = frac_to_quantity(&frac);
+                        value = decutil::frac_to_quantity(&frac);
                     }
                     _ => (),
                 },
@@ -128,7 +139,72 @@ impl PriceDatabase {
         }
     }
 
-    fn add_price(&mut self, price: Price) {
+    // TODO: Update the database in-place by using mut self
+    pub fn write_price_from_quote(
+        &self,
+        conn: &Connection,
+        q: &quote::Quote,
+        old_price: &Price,
+    ) -> Result<Price, CommodityError> {
+        let new_price = old_price.at_new_quoted_value(q);
+        let new_price_uuid: String = uuid::Uuid::new_v4()
+            .to_simple()
+            .encode_lower(&mut uuid::Uuid::encode_buffer())
+            .to_string();
+
+        // Handle the edge case of commodities IDs being missing
+        // (This should only happen if parsing from XML)
+        let commodity_guid: String = match &new_price.from_commodity.guid {
+            Some(guid) => guid.clone(),
+            None => {
+                return Err(CommodityError {
+                    commodity_id: new_price.from_commodity.id.clone(),
+                })
+            }
+        };
+        let currency_guid: String = match &new_price.to_commodity.guid {
+            Some(guid) => guid.clone(),
+            None => {
+                return Err(CommodityError {
+                    commodity_id: new_price.to_commodity.id.clone(),
+                })
+            }
+        };
+
+        let cents: u64 = decutil::price_to_cents(&new_price.value).unwrap();
+
+        conn.execute(
+            "INSERT INTO prices (
+                   guid,
+                   commodity_guid,
+                   currency_guid,
+
+                   -- Actually a datestring! Warning: UTC, but where we always use noon *local* time
+                   date,
+                   source,
+                   type,
+
+                   value_num,
+                   value_denom
+               )
+               VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+            params![
+                &new_price_uuid,
+                &commodity_guid,
+                &currency_guid,
+                &dateutil::datetime_for_sqlite(new_price.time),
+                "Finance::Quote",
+                "last",
+                &cents.to_string(),
+                "100",
+            ],
+        )
+        .unwrap();
+
+        Ok(new_price)
+    }
+
+    fn read_price(&mut self, price: Price) {
         let name = String::from(price.commodity_name());
         match self.last_price_by_commodity.get(&name) {
             Some(existing) => {
@@ -184,7 +260,7 @@ impl PriceDatabase {
 
             let price = Price {
                 value,
-                time: utc_to_datetime(&dt),
+                time: dateutil::utc_to_datetime(&dt),
                 from_commodity: Commodity::new(
                     Some(row.get(3)?),
                     row.get(4)?,
@@ -201,7 +277,7 @@ impl PriceDatabase {
             Ok(price)
         })?;
         for price in price_iter {
-            self.add_price(price.unwrap());
+            self.read_price(price.unwrap());
         }
         Ok(())
     }
@@ -217,7 +293,7 @@ impl PriceDatabase {
                         if !&price.is_in_usd() {
                             continue;
                         }
-                        self.add_price(price);
+                        self.read_price(price);
                     }
                     _ => (),
                 },
@@ -233,7 +309,7 @@ impl PriceDatabase {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Commodity {
     pub guid: Option<String>, // a UUID lowercased with no hypens, absent from XML
     pub id: String,           // "VTSAX"
@@ -348,7 +424,7 @@ struct LazySplit {
 impl GenericSplit for LazySplit {
     fn get_quantity(&self) -> Decimal {
         match &self.quantity_fraction {
-            Ok(frac) => frac_to_quantity(&frac),
+            Ok(frac) => decutil::frac_to_quantity(&frac),
             Err(_) => panic!("Error parsing quantity"),
         }
     }
@@ -356,7 +432,7 @@ impl GenericSplit for LazySplit {
     #[allow(dead_code)]
     fn get_value(&self) -> Decimal {
         match &self.value_fraction {
-            Ok(frac) => frac_to_quantity(&frac),
+            Ok(frac) => decutil::frac_to_quantity(&frac),
             Err(_) => panic!("Error parsing value"),
         }
     }
@@ -430,7 +506,7 @@ struct Transaction {
 impl Transaction {
     #[allow(dead_code)]
     fn date_posted(&self) -> DateTime<Local> {
-        to_datetime(&self.date_posted_string)
+        dateutil::localize_from_dt_with_tz(&self.date_posted_string).unwrap()
     }
 
     fn parse_splits(reader: &mut Reader<BufReader<File>>) -> Vec<Split> {
@@ -821,23 +897,68 @@ impl Book {
             .collect()
     }
 
-    pub fn update_commodities(&self, conn: &Connection) {
-        // TODO: Time out after five?
-        for commodity in self.commodities_needing_quotes(conn) {
-            let quote = quote::FinanceQuote::fetch_quote(&commodity);
-            let price = self.pricedb.last_commodity_price(&commodity);
+    // TODO: Run these requests in parallel.
+    fn update_price_if_needed(
+        &self,
+        conn: &Connection,
+        commodity: &Commodity,
+    ) -> Result<Option<Price>, quote::FinanceQuoteError> {
+        let last_price = self.pricedb.last_commodity_price(commodity);
 
-            let should_update = match price {
-                // Update if the quote is more current, or it's the same date but different info
-                Some(price) => {
-                    price.time.naive_local().date() < quote.time.date() || price.value != quote.last
-                }
-                None => false,
-            };
+        // Output what's happening, since this can be slow.
+        print!("Fetching latest price for {:}", commodity.id);
+        match last_price {
+            Some(price) => print!(": {:}", price.value),
+            None => {}
         }
+        std::io::stdout().flush().ok();
+
+        // Alphavantage will error out if exceeding 5 calls in a minute!
+        let last_quote = match quote::FinanceQuote::fetch_quote(commodity) {
+            Ok(quote) => {
+                println!(
+                    " --> {:} ({:})",
+                    quote.last,
+                    quote.time.date().format("%Y-%m-%d")
+                );
+                quote
+            }
+            Err(e) => {
+                println!("  ERROR!");
+                return Err(e);
+            }
+        };
+
+        let updated_price: Option<Price> = match last_price {
+            Some(price) => {
+                if price.should_update_with_quote(&last_quote) {
+                    self.pricedb
+                        .write_price_from_quote(conn, &last_quote, &price)
+                        .ok()
+                } else {
+                    None
+                }
+            }
+            // TODO: When there's no known last price, we should be able to get the `to_commodity`
+            // (which is just USD) and write the first price to the database.
+            // However, since we lack the commodity UUID, we can't write.
+            // For now, the best workaround for new commodities is to fetch once in Gnucash.
+            None => {
+                println!("Currently not able to write first price on new commodities");
+                None
+            }
+        };
+
+        Ok(updated_price)
+    }
+    pub fn update_commodities(&self, conn: &Connection) -> Result<(), quote::FinanceQuoteError> {
+        for commodity in self.commodities_needing_quotes(conn) {
+            self.update_price_if_needed(conn, &commodity)?;
+        }
+        Ok(())
     }
 
-    fn investment_accounts(conn: &Connection) -> Vec<Account> {
+    fn get_investment_accounts(conn: &Connection) -> Vec<Account> {
         let mut stmt = conn
             .prepare(
                 "SELECT a.guid, a.name,
@@ -871,14 +992,22 @@ impl GnucashFromSqlite for Book {
     fn from_sqlite(conn: &Connection) -> Book {
         let mut book = Book::new();
 
-        for mut account in Book::investment_accounts(conn) {
+        for mut account in Book::get_investment_accounts(conn) {
             assert!(account.is_investment());
             account.read_splits_from_sqlite(conn).unwrap();
             book.add_investment(account);
         }
 
         book.pricedb.populate_from_sqlite(conn).unwrap();
-        book.update_commodities(conn);
+        if conf.gnucash.update_prices {
+            match book.update_commodities(conn) {
+                Ok(_) => (),
+                Err(e) => println!(
+                    "Failed to fetch price for {:}, continuing without updating other prices",
+                    e.symbol
+                ),
+            };
+        }
         book
     }
 }
