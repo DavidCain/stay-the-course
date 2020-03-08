@@ -876,24 +876,41 @@ impl Book {
     fn commodities_needing_quotes(&self, conn: &Connection) -> Vec<Commodity> {
         let now = Local::now();
 
-        Book::alphavantage_commodities(conn)
-            .unwrap()
-            .into_iter()
-            .filter(|commodity| {
-                let price = self.pricedb.last_commodity_price(&commodity);
-                match price {
-                    // NOTE: It could be the weekend or a trading holiday
-                    // Trying to get a quote might be fruitless, but that's okay.
-                    // (We can get a quote, see that if it's stale, then try again tomorrow)
-                    Some(price) => {
-                        let days = (now - price.time).num_days().abs();
-                        // println!("Days without quote for {:}: {:}", commodity.id, days);
-                        days > 1
+        struct PriceAndCommodity<'a> {
+            price: Option<&'a Price>,
+            commodity: Commodity,
+        }
+
+        let mut commodities_and_prices: Vec<PriceAndCommodity> =
+            Book::alphavantage_commodities(conn)
+                .unwrap()
+                .into_iter()
+                .map(|commodity| PriceAndCommodity {
+                    price: self.pricedb.last_commodity_price(&commodity),
+                    commodity,
+                })
+                .filter(|cap| {
+                    match cap.price {
+                        // If no price was found, we definitely need a new quote.
+                        None => true,
+                        // For all others, only fetch quotes if it's been more than a day
+                        Some(price) => {
+                            let days = (now - price.time).num_days().abs();
+                            days > 1
+                        }
                     }
-                    // If no price was found, we definitely need a new quote.
-                    None => true,
-                }
-            })
+                })
+                .collect();
+
+        // Commodities with the oldest date will come first
+        commodities_and_prices.sort_by_key(|cap| match cap.price {
+            Some(price) => price.time.date(),
+            // Because we can't currently handle them, put commodities missing prices last
+            None => now.date(),
+        });
+        commodities_and_prices
+            .into_iter()
+            .map(|cap| cap.commodity)
             .collect()
     }
 
