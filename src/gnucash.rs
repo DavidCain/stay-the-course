@@ -4,7 +4,7 @@ extern crate rusqlite;
 extern crate rust_decimal;
 extern crate uuid;
 
-use self::chrono::{DateTime, Local};
+use self::chrono::{DateTime, Datelike, Local};
 use self::quick_xml::events::Event;
 use self::quick_xml::Reader;
 use self::rusqlite::{params, Connection, NO_PARAMS};
@@ -891,13 +891,19 @@ impl Book {
                 })
                 .filter(|cap| {
                     match cap.price {
-                        // If no price was found, we definitely need a new quote.
-                        None => true,
-                        // For all others, only fetch quotes if it's been more than a day
                         Some(price) => {
                             let days = (now - price.time).num_days().abs();
-                            days > 1
+                            // println!("Days without quote for {:}: {:}", cap.commodity.id, days);
+                            // If it's been more than a day, fetch!
+                            // (If it's currently the weekend, last Friday's fetch will do)
+                            match now.weekday() {
+                                chrono::Weekday::Sat => days > 1,
+                                chrono::Weekday::Sun => days > 2,
+                                _ => days > 0,
+                            }
                         }
+                        // If no price was found, we definitely need a new quote.
+                        None => true,
                     }
                 })
                 .collect();
