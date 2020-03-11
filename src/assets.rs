@@ -38,6 +38,7 @@ impl Error for UnclassifiedAssetError {
 #[derive(Debug, PartialEq, Eq)]
 pub struct Asset {
     pub name: String,
+    pub symbol: Option<String>,
     pub value: Decimal,
     pub asset_class: AssetClass,
     // Not strictly necessariy, but helpful for displaying info about the asset
@@ -49,6 +50,7 @@ pub struct Asset {
 impl Asset {
     pub fn new(
         name: String,
+        symbol: Option<String>,
         value: Decimal,
         asset_class: AssetClass,
         quantity: Option<Decimal>,
@@ -57,6 +59,7 @@ impl Asset {
     ) -> Asset {
         Asset {
             name,
+            symbol,
             value,
             asset_class,
             quantity,
@@ -102,7 +105,11 @@ impl fmt::Display for Asset {
             descriptor = format!("{:}, {:}", descriptor, last_known.date());
         }
 
-        write!(f, "{:}: ${:.2} ({:})", self.name, self.value, descriptor)
+        let label = match &self.symbol {
+            Some(symbol) => format!("{:} ({:})", symbol, self.name),
+            None => self.name.clone(),
+        };
+        write!(f, "{:}: ${:.2} ({:})", label, self.value, descriptor)
     }
 }
 
@@ -238,9 +245,27 @@ GGGGG,Cash";
     }
 
     #[test]
+    fn asset_with_unknown_ticker() {
+        let asset = Asset::new(
+            String::from("Private Company"),
+            None,
+            5196.into(),
+            AssetClass::USStocks,
+            Some(Decimal::from(400)),
+            Some(Decimal::new(1299, 2)),
+            None,
+        );
+        assert_eq!(
+            format!("{}", asset),
+            "Private Company: $5196.00 (400 x $12.99)"
+        );
+    }
+
+    #[test]
     fn asset_with_unknown_price_and_quantity() {
         let asset = Asset::new(
-            String::from("VTABX"),
+            String::from("Vanguard Total Intl Bd Idx Admiral"),
+            Some(String::from("VTABX")),
             1234.into(),
             AssetClass::IntlBonds,
             None,
@@ -249,20 +274,24 @@ GGGGG,Cash";
         );
         assert_eq!(
             format!("{}", asset),
-            "VTABX: $1234.00 (unknown price & quantity)"
+            "VTABX (Vanguard Total Intl Bd Idx Admiral): $1234.00 (unknown price & quantity)"
         );
     }
 
     #[test]
     fn asset_last_known_time_missing() {
         let asset = Asset::new(
-            String::from("VTABX"),
+            String::from("Vanguard Total Intl Bd Idx Admiral"),
+            Some(String::from("VTABX")),
             10392.into(),
             AssetClass::IntlBonds,
             Some(Decimal::from(800)),
             Some(Decimal::new(1299, 2)),
             None,
         );
-        assert_eq!(format!("{}", asset), "VTABX: $10392.00 (800 x $12.99)");
+        assert_eq!(
+            format!("{}", asset),
+            "VTABX (Vanguard Total Intl Bd Idx Admiral): $10392.00 (800 x $12.99)"
+        );
     }
 }

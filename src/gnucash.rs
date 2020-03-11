@@ -813,10 +813,16 @@ impl Book {
                 continue;
             }
 
+            let symbol: Option<String> = match &account.commodity {
+                Some(commodity) => Some(commodity.id.to_owned()),
+                None => None,
+            };
+
             if let Some(commodity) = &account.commodity {
                 let asset_class = asset_classifications.classify(&commodity.id).unwrap();
                 non_zero_holdings.push(assets::Asset::new(
                     account.name.to_owned(),
+                    symbol,
                     value,
                     asset_class.to_owned(),
                     Some(account.current_quantity()),

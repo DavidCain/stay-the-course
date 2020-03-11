@@ -336,7 +336,8 @@ mod tests {
         let mut stocks = AssetAllocation::new(AssetClass::USStocks, 1.into());
 
         stocks.add_asset(Asset::new(
-            String::from("VTABX"),
+            String::from("Vanguard Total Intl Bd Idx Admiral"),
+            Some(String::from("VTABX")),
             1234.into(),
             AssetClass::IntlBonds,
             None,
@@ -351,7 +352,8 @@ mod tests {
         assert_eq!(stocks.current_value(), 0.into());
 
         stocks.add_asset(Asset::new(
-            String::from("VTSAX"),
+            String::from("Vanguard Total Stock Market Index Fund Admiral Shares"),
+            Some(String::from("VTSAX")),
             8675.into(),
             AssetClass::USStocks,
             None,
@@ -362,7 +364,8 @@ mod tests {
         assert_eq!(stocks.current_value(), Decimal::from(8675));
 
         stocks.add_asset(Asset::new(
-            String::from("FZROX"),
+            String::from("Fidelity ZERO Total Market Index Fund"),
+            Some(String::from("FZROX")),
             10000.into(),
             AssetClass::USStocks,
             None,
@@ -417,7 +420,8 @@ mod tests {
 
         // We keep $10 in bonds, but plan to contribute nearly $1 million in stocks
         bonds.add_asset(Asset::new(
-            String::from("VBTLX"),
+            String::from("Vanguard Total Intl Bd Idx Admiral"),
+            Some(String::from("VBTLX")),
             10.into(),
             AssetClass::USBonds,
             None,
