@@ -980,11 +980,17 @@ impl Book {
 
         Ok(updated_price)
     }
-    pub fn update_commodities(&self, conn: &Connection) -> Result<(), quote::FinanceQuoteError> {
+    fn update_commodities(
+        &self,
+        conn: &Connection,
+    ) -> Result<Vec<Price>, quote::FinanceQuoteError> {
+        let mut new_prices = Vec::new();
         for commodity in self.commodities_needing_quotes(conn) {
-            self.update_price_if_needed(conn, &commodity)?;
+            if let Some(price) = self.update_price_if_needed(conn, &commodity)? {
+                new_prices.push(price);
+            }
         }
-        Ok(())
+        Ok(new_prices)
     }
 
     fn get_investment_accounts(conn: &Connection) -> Vec<Account> {
@@ -1030,7 +1036,13 @@ impl GnucashFromSqlite for Book {
         book.pricedb.populate_from_sqlite(conn).unwrap();
         if conf.gnucash.update_prices {
             match book.update_commodities(conn) {
-                Ok(_) => (),
+                Ok(updated_commodities) => {
+                    if updated_commodities.len() > 0 {
+                        // Currently, must re-populate from database to get the most current prices!
+                        // TODO: `write_price_from_quote()` should update the PriceDatabase in-place
+                        book.pricedb.populate_from_sqlite(conn).unwrap();
+                    }
+                }
                 Err(e) => println!(
                     "Failed to fetch price for {:}, continuing without updating other prices",
                     e.symbol
