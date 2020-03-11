@@ -11,8 +11,7 @@ pub fn frac_to_quantity(fraction: &str) -> Decimal {
 }
 
 pub fn price_to_cents(quantity: &Decimal) -> Option<u64> {
-    let mut rounded_to_whole_cents = quantity.round_dp(2);
-    rounded_to_whole_cents.set_scale(0).unwrap();
+    let rounded_to_whole_cents = (quantity * Decimal::from(100)).round();
     rounded_to_whole_cents.to_u64()
 }
 
@@ -36,6 +35,14 @@ mod tests {
     #[test]
     fn test_price_to_cents() {
         assert_eq!(price_to_cents(&Decimal::new(3525, 2)), Some(3525));
+        assert_eq!(
+            price_to_cents(&Decimal::from_str("25.4").unwrap()),
+            Some(2540)
+        );
+        assert_eq!(
+            price_to_cents(&Decimal::from_str("25").unwrap()),
+            Some(2500)
+        );
     }
 
     #[test]
