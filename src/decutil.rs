@@ -4,7 +4,7 @@ use self::rust_decimal::Decimal;
 use std::str::FromStr;
 
 pub fn frac_to_quantity(fraction: &str) -> Decimal {
-    let mut components = fraction.split("/");
+    let mut components = fraction.split('/');
     let numerator = components.next().unwrap();
     let denomenator = components.next().unwrap();
     Decimal::from_str(numerator).unwrap() / Decimal::from_str(denomenator).unwrap()

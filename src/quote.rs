@@ -90,8 +90,10 @@ impl FinanceQuote {
         // expression as a deserializable struct.
         //
         // We toss out the symbol on the left side of the tuple, then deserialize the remainder.
-        let v = lexpr::from_str(data).expect(&format!("Invalid s-expression {:}", data));
-        let symbol_and_quote = v[0].as_pair().expect(&format!("Expected tuple {:}", data));
+        let v = lexpr::from_str(data).unwrap_or_else(|_| panic!("Invalid s-expression {:}", data));
+        let symbol_and_quote = v[0]
+            .as_pair()
+            .unwrap_or_else(|| panic!("Expected tuple {:}", data));
         let quote = symbol_and_quote.1;
 
         Some(serde_lexpr::from_str(&quote.to_string()).unwrap())

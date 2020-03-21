@@ -59,8 +59,8 @@ impl Price {
         Price {
             from_commodity: self.from_commodity.clone(),
             to_commodity: self.to_commodity.clone(),
-            value: q.last.clone(),
-            time: q.time.clone(),
+            value: q.last,
+            time: q.time,
         }
     }
 
@@ -103,10 +103,11 @@ impl GnucashFromXML for Price {
                     }
                     _ => (),
                 },
-                Ok(Event::End(ref e)) => match e.name() {
-                    b"price" => break,
-                    _ => (),
-                },
+                Ok(Event::End(ref e)) => {
+                    if let b"price" = e.name() {
+                        break;
+                    }
+                }
                 Ok(_) => (),
                 Err(e) => panic!("Error at position {}: {:?}", reader.buffer_position(), e),
             }
@@ -131,6 +132,13 @@ struct PriceDatabase {
     last_price_by_commodity: HashMap<String, Price>,
 }
 
+pub fn new_uuid() -> String {
+    (*uuid::Uuid::new_v4()
+        .to_simple()
+        .encode_lower(&mut uuid::Uuid::encode_buffer()))
+    .to_string()
+}
+
 impl PriceDatabase {
     fn new() -> PriceDatabase {
         let last_price_by_commodity: HashMap<String, Price> = HashMap::new();
@@ -147,10 +155,7 @@ impl PriceDatabase {
         old_price: &Price,
     ) -> Result<Price, CommodityError> {
         let new_price = old_price.at_new_quoted_value(q);
-        let new_price_uuid: String = uuid::Uuid::new_v4()
-            .to_simple()
-            .encode_lower(&mut uuid::Uuid::encode_buffer())
-            .to_string();
+        let new_price_uuid = new_uuid();
 
         // Handle the edge case of commodities IDs being missing
         // (This should only happen if parsing from XML)
@@ -206,13 +211,10 @@ impl PriceDatabase {
 
     fn read_price(&mut self, price: Price) {
         let name = String::from(price.commodity_name());
-        match self.last_price_by_commodity.get(&name) {
-            Some(existing) => {
-                if price.time < existing.time {
-                    return;
-                }
+        if let Some(existing) = self.last_price_by_commodity.get(&name) {
+            if price.time < existing.time {
+                return;
             }
-            None => (),
         }
         self.last_price_by_commodity.insert(name, price);
     }
@@ -287,20 +289,20 @@ impl PriceDatabase {
 
         loop {
             match reader.read_event(&mut buf) {
-                Ok(Event::Start(ref e)) => match e.name() {
-                    b"price" => {
+                Ok(Event::Start(ref e)) => {
+                    if let b"price" = e.name() {
                         let price = Price::from_xml(reader);
                         if !&price.is_in_usd() {
                             continue;
                         }
                         self.read_price(price);
                     }
-                    _ => (),
-                },
-                Ok(Event::End(ref e)) => match e.name() {
-                    b"gnc:pricedb" => break,
-                    _ => (),
-                },
+                }
+                Ok(Event::End(ref e)) => {
+                    if let b"gnc:pricedb" = e.name() {
+                        break;
+                    }
+                }
                 Ok(_) => (),
                 Err(e) => panic!("Error at position {}: {:?}", reader.buffer_position(), e),
             }
@@ -470,10 +472,11 @@ impl GnucashFromXML for LazySplit {
                     }
                     _ => (),
                 },
-                Ok(Event::End(ref e)) => match e.name() {
-                    b"trn:split" => break,
-                    _ => (),
-                },
+                Ok(Event::End(ref e)) => {
+                    if let b"trn:split" = e.name() {
+                        break;
+                    }
+                }
                 Ok(_) => (),
                 Err(e) => panic!("Error at position {}: {:?}", reader.buffer_position(), e),
             }
@@ -522,10 +525,11 @@ impl Transaction {
                     }
                     _ => panic!("Unexpected tag in list of splits"),
                 },
-                Ok(Event::End(ref e)) => match e.name() {
-                    b"trn:splits" => break,
-                    _ => (),
-                },
+                Ok(Event::End(ref e)) => {
+                    if let b"trn:splits" = e.name() {
+                        break;
+                    }
+                }
                 Ok(Event::Eof) => panic!("Unexpected EOF before closing splits tag!"),
                 Err(e) => panic!("Error at position {}: {:?}", reader.buffer_position(), e),
                 _ => (), // There are several other `Event`s we do not consider here
@@ -547,10 +551,11 @@ impl Transaction {
                     }
                     _ => panic!("Unexpected tag in list of splits"),
                 },
-                Ok(Event::End(ref e)) => match e.name() {
-                    b"trn:date-posted" => break,
-                    _ => (),
-                },
+                Ok(Event::End(ref e)) => {
+                    if let b"trn:date-posted" = e.name() {
+                        break;
+                    }
+                }
                 Ok(Event::Eof) => panic!("Unexpected EOF before closing date-posted tag!"),
                 Err(e) => panic!("Error at position {}: {:?}", reader.buffer_position(), e),
                 _ => (), // There are several other `Event`s we do not consider here
@@ -590,10 +595,11 @@ impl GnucashFromXML for Transaction {
                 // If we found the end of this commodity tag, then stop moving through the tree
                 // (We don't want to progress into other tags)
                 // (Doesn't handle nested tags, but that's okay - gnc:commodity never nests)
-                Ok(Event::End(ref e)) => match e.name() {
-                    b"gnc:transaction" => break,
-                    _ => (),
-                },
+                Ok(Event::End(ref e)) => {
+                    if let b"gnc:transaction" = e.name() {
+                        break;
+                    }
+                }
                 Ok(Event::Eof) => panic!("Unexpected EOF before closing transaction tag!"),
                 Err(e) => panic!("Error at position {}: {:?}", reader.buffer_position(), e),
                 _ => (), // There are several other `Event`s we do not consider here
@@ -732,10 +738,11 @@ impl GnucashFromXML for Account {
                 // If we found the end of this account tag, then stop moving through the tree
                 // (We don't want to progress into other tags)
                 // (Doesn't handle nested tags, but that's okay - gnc:account never nests)
-                Ok(Event::End(ref e)) => match e.name() {
-                    b"gnc:account" => break,
-                    _ => (),
-                },
+                Ok(Event::End(ref e)) => {
+                    if let b"gnc:account" = e.name() {
+                        break;
+                    }
+                }
                 Ok(Event::Eof) => panic!("Unexpected EOF before closing account tag!"),
                 Err(e) => panic!("Error at position {}: {:?}", reader.buffer_position(), e),
                 _ => (), // There are several other `Event`s we do not consider here
@@ -763,9 +770,9 @@ impl Book {
     pub fn from_config(conf: &Config) -> Book {
         let path = &conf.gnucash.path_to_book;
         if conf.gnucash.file_format == "sqlite3" {
-            return Book::from_sqlite_file(path, conf);
+            Book::from_sqlite_file(path, conf)
         } else if conf.gnucash.file_format == "xml" {
-            return Book::from_xml_file(path);
+            Book::from_xml_file(path)
         } else {
             panic!("Other file formats not supported at this time");
         }
@@ -788,9 +795,8 @@ impl Book {
             Split::Lazy(lazy_split) => lazy_split.account.clone(),
             Split::Computed(computed_split) => computed_split.account.clone(),
         };
-        match self.account_by_guid.get_mut(&account_name) {
-            Some(account) => account.add_split(split),
-            None => (),
+        if let Some(account) = self.account_by_guid.get_mut(&account_name) {
+            account.add_split(split);
         }
     }
 
@@ -805,7 +811,7 @@ impl Book {
             let last_price = self
                 .pricedb
                 .last_price_for(account)
-                .expect(&format!("No last price found for {:?}", account.commodity));
+                .unwrap_or_else(|| panic!("No last price found for {:?}", account.commodity));
 
             let value = account.current_value(last_price);
             if value == 0.into() {
@@ -936,9 +942,8 @@ impl Book {
 
         // Output what's happening, since this can be slow.
         print!("Fetching latest price for {:}", commodity.id);
-        match last_price {
-            Some(price) => print!(": {:}", price.value),
-            None => {}
+        if let Some(price) = last_price {
+            print!(": {:}", price.value);
         }
         std::io::stdout().flush().ok();
 
@@ -1006,20 +1011,17 @@ impl Book {
             )
             .expect("Invalid SQL");
 
-        let investment_accounts = stmt
-            .query_map(NO_PARAMS, |row| {
-                let account_guid = row.get(0)?;
-                let account_name = row.get(1)?;
-                let commodity =
-                    Commodity::new(Some(row.get(2)?), row.get(3)?, row.get(4)?, row.get(5)?);
+        stmt.query_map(NO_PARAMS, |row| {
+            let account_guid = row.get(0)?;
+            let account_name = row.get(1)?;
+            let commodity =
+                Commodity::new(Some(row.get(2)?), row.get(3)?, row.get(4)?, row.get(5)?);
 
-                Ok(Account::new(account_guid, account_name, Some(commodity)))
-            })
-            .unwrap()
-            .map(|ret| ret.unwrap())
-            .collect();
-
-        investment_accounts
+            Ok(Account::new(account_guid, account_name, Some(commodity)))
+        })
+        .unwrap()
+        .map(|ret| ret.unwrap())
+        .collect()
     }
 }
 
@@ -1037,7 +1039,7 @@ impl GnucashFromSqlite for Book {
         if conf.gnucash.update_prices {
             match book.update_commodities(conn) {
                 Ok(updated_commodities) => {
-                    if updated_commodities.len() > 0 {
+                    if !updated_commodities.is_empty() {
                         // Currently, must re-populate from database to get the most current prices!
                         // TODO: `write_price_from_quote()` should update the PriceDatabase in-place
                         book.pricedb.populate_from_sqlite(conn).unwrap();

@@ -97,7 +97,7 @@ pub struct Portfolio {
 impl fmt::Display for Portfolio {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // Display allocations in order, starting from the largest
-        for allocation in (&self.allocations).into_iter() {
+        for allocation in (&self.allocations).iter() {
             writeln!(f, "{:}", allocation)?;
         }
         write!(f, "Portfolio total: ${:.0}", self.current_value())
@@ -223,7 +223,7 @@ pub fn optimally_allocate(mut portfolio: Portfolio, contribution: Decimal) -> Po
 
     // The amount left for contribution begins as the total amount we have available
     // (We will portion this money out sequentially to each fund, eventually exhausting it)
-    let mut amount_left_to_contribute = contribution.clone();
+    let mut amount_left_to_contribute = contribution;
 
     // The new total is our portfolio's current value, plus the amount we'll contribute
     // In other words, this will be the denomenator for calculating final percent allocation

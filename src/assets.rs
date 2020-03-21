@@ -172,8 +172,7 @@ impl AssetClassifications {
         let mut asset_classifications = AssetClassifications::new();
         for result in rdr.deserialize() {
             let asset_class: AssetClassMapping = result?;
-            let name = String::from(asset_class.ticker_name);
-            asset_classifications.add(name, asset_class.asset_class);
+            asset_classifications.add(asset_class.ticker_name, asset_class.asset_class);
         }
         Ok(asset_classifications)
     }

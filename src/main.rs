@@ -68,7 +68,7 @@ fn summarize_retirement_prospects(birthday: NaiveDate, portfolio_total: Decimal,
         let future_total = compounding::compound(portfolio_total, real_apy, day_of_retirement);
         summarize(day_of_retirement, birthday, future_total);
     }
-    println!("");
+    println!();
 }
 
 fn main() {
