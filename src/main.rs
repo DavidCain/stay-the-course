@@ -20,8 +20,8 @@ mod quote;
 mod rebalance;
 mod stats;
 
-use config::Config;
-use gnucash::Book;
+use crate::config::Config;
+use crate::gnucash::Book;
 
 fn get_contribution() -> Decimal {
     let mut contribution = String::new();

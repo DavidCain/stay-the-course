@@ -15,19 +15,19 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufReader;
 
-use assets;
-use config::Config;
-use dateutil;
-use decutil;
-use quote;
-use rebalance::{AssetAllocation, Portfolio};
+use crate::assets;
+use crate::config::Config;
+use crate::dateutil;
+use crate::decutil;
+use crate::quote;
+use crate::rebalance::{AssetAllocation, Portfolio};
 
 trait GnucashFromXML {
-    fn from_xml(&mut Reader<BufReader<File>>) -> Self;
+    fn from_xml(_: &mut Reader<BufReader<File>>) -> Self;
 }
 
 trait GnucashFromSqlite {
-    fn from_sqlite(&Connection, conf: &Config) -> Self;
+    fn from_sqlite(_: &Connection, conf: &Config) -> Self;
 }
 
 #[derive(Debug)]

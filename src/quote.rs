@@ -11,8 +11,8 @@ use std::io::Read;
 use std::io::Write;
 use std::process::{Command, Stdio};
 
-use dateutil;
-use gnucash::Commodity;
+use crate::dateutil;
+use crate::gnucash::Commodity;
 
 use std::fmt;
 

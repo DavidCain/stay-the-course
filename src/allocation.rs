@@ -3,8 +3,8 @@ extern crate rust_decimal;
 
 use self::chrono::{Local, NaiveDate};
 use self::rust_decimal::Decimal;
-use assets::AssetClass;
-use rebalance::AssetAllocation;
+use crate::assets::AssetClass;
+use crate::rebalance::AssetAllocation;
 
 fn age_in_weeks(birthday: NaiveDate) -> i64 {
     let today: NaiveDate = Local::now().date().naive_local();
