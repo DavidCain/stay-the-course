@@ -1,6 +1,5 @@
-extern crate rust_decimal;
-use self::rust_decimal::prelude::ToPrimitive;
-use self::rust_decimal::Decimal;
+use rust_decimal::prelude::ToPrimitive;
+use rust_decimal::Decimal;
 use std::fmt;
 use std::str::FromStr;
 

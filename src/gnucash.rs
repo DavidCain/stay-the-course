@@ -1,14 +1,8 @@
-extern crate chrono;
-extern crate quick_xml;
-extern crate rusqlite;
-extern crate rust_decimal;
-extern crate uuid;
-
-use self::chrono::{DateTime, Datelike, Local};
-use self::quick_xml::events::Event;
-use self::quick_xml::Reader;
-use self::rusqlite::{params, Connection, NO_PARAMS};
-use self::rust_decimal::Decimal;
+use chrono::{DateTime, Datelike, Local};
+use quick_xml::events::Event;
+use quick_xml::Reader;
+use rusqlite::{params, Connection, NO_PARAMS};
+use rust_decimal::Decimal;
 use std::collections::HashMap;
 use std::convert::Into;
 use std::fs::File;

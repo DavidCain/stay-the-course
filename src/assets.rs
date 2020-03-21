@@ -1,9 +1,5 @@
-extern crate chrono;
-extern crate csv;
-extern crate rust_decimal;
-
-use self::chrono::{DateTime, Local};
-use self::rust_decimal::Decimal;
+use chrono::{DateTime, Local};
+use rust_decimal::Decimal;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::error::Error;

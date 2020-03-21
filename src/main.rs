@@ -1,11 +1,8 @@
 #[macro_use]
 extern crate serde_derive;
-extern crate chrono;
-extern crate num;
-extern crate rust_decimal;
 
-use self::chrono::{Datelike, Local, NaiveDate};
-use self::rust_decimal::Decimal;
+use chrono::{Datelike, Local, NaiveDate};
+use rust_decimal::Decimal;
 use std::cmp;
 use std::io;
 

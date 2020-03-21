@@ -1,9 +1,6 @@
-extern crate chrono;
-extern crate serde_derive;
-
 use serde_derive::Deserialize;
 
-use self::chrono::NaiveDate;
+use chrono::NaiveDate;
 use std::fs;
 
 #[derive(Deserialize)]

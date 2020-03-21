@@ -1,7 +1,5 @@
-extern crate rust_decimal;
-
-use self::rust_decimal::Decimal;
 use crate::assets::{Asset, AssetClass};
+use rust_decimal::Decimal;
 use std::cmp;
 use std::fmt;
 

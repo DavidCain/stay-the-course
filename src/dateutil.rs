@@ -1,5 +1,4 @@
-extern crate chrono;
-use self::chrono::{DateTime, Local, NaiveDateTime, ParseResult, TimeZone, Utc};
+use chrono::{DateTime, Local, NaiveDateTime, ParseResult, TimeZone, Utc};
 
 static GNUCASH_DT_FORMAT: &str = "%Y-%m-%d %H:%M:%S %z";
 static GNUCASH_NO_DT_FORMAT: &str = "%Y-%m-%d %H:%M:%S";

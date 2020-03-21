@@ -1,10 +1,6 @@
-extern crate chrono;
-extern crate num;
-extern crate rust_decimal;
-
-use self::chrono::{Local, NaiveDate};
-use self::rust_decimal::Decimal;
+use chrono::{Local, NaiveDate};
 use num::ToPrimitive;
+use rust_decimal::Decimal;
 
 fn years_until(future_date: NaiveDate) -> f64 {
     let today: NaiveDate = Local::now().date().naive_local();

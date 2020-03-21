@@ -1,8 +1,5 @@
-extern crate rusqlite;
-extern crate rust_decimal;
-
-use self::rusqlite::{Connection, NO_PARAMS};
-use self::rust_decimal::Decimal;
+use rusqlite::{Connection, NO_PARAMS};
+use rust_decimal::Decimal;
 
 pub struct Stats {
     conn: Connection,

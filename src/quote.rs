@@ -1,12 +1,6 @@
-extern crate chrono;
-extern crate lexpr;
-extern crate rust_decimal;
-extern crate serde;
-extern crate serde_lexpr;
-
-use self::chrono::{DateTime, Local};
-use self::rust_decimal::Decimal;
-use self::serde::{de, Deserialize, Deserializer};
+use chrono::{DateTime, Local};
+use rust_decimal::Decimal;
+use serde::{de, Deserialize, Deserializer};
 use std::io::Read;
 use std::io::Write;
 use std::process::{Command, Stdio};
