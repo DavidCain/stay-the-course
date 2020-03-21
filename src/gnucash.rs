@@ -99,7 +99,7 @@ impl GnucashFromXML for Price {
                     }
                     b"price:value" => {
                         let frac = reader.read_text(e.name(), &mut Vec::new()).unwrap();
-                        value = decutil::frac_to_quantity(&frac);
+                        value = decutil::frac_to_quantity(&frac).unwrap();
                     }
                     _ => (),
                 },
@@ -426,7 +426,7 @@ struct LazySplit {
 impl GenericSplit for LazySplit {
     fn get_quantity(&self) -> Decimal {
         match &self.quantity_fraction {
-            Ok(frac) => decutil::frac_to_quantity(&frac),
+            Ok(frac) => decutil::frac_to_quantity(&frac).unwrap(),
             Err(_) => panic!("Error parsing quantity"),
         }
     }
@@ -434,7 +434,7 @@ impl GenericSplit for LazySplit {
     #[allow(dead_code)]
     fn get_value(&self) -> Decimal {
         match &self.value_fraction {
-            Ok(frac) => decutil::frac_to_quantity(&frac),
+            Ok(frac) => decutil::frac_to_quantity(&frac).unwrap(),
             Err(_) => panic!("Error parsing value"),
         }
     }
