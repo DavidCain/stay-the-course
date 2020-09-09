@@ -79,15 +79,18 @@ impl FinanceQuote {
             return None;
         }
 
+        // The s-expr library can't handle the #e indication, so strip it.
+        let expr: &str = &data.replace("#e", "");
+
         // Left side of the tuple is the symbol, right side is the result!
         // Because left side (symbol) is juts a string, we cannot easily represent the whole
         // expression as a deserializable struct.
         //
         // We toss out the symbol on the left side of the tuple, then deserialize the remainder.
-        let v = lexpr::from_str(data).unwrap_or_else(|_| panic!("Invalid s-expression {:}", data));
+        let v = lexpr::from_str(expr).unwrap_or_else(|_| panic!("Invalid s-expression {:}", expr));
         let symbol_and_quote = v[0]
             .as_pair()
-            .unwrap_or_else(|| panic!("Expected tuple {:}", data));
+            .unwrap_or_else(|| panic!("Expected tuple {:}", expr));
         let quote = symbol_and_quote.1;
 
         Some(serde_lexpr::from_str(&quote.to_string()).unwrap())
@@ -103,6 +106,29 @@ struct Person {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_parse_quote_hash_e() {
+        // Test sample return value! Raw result (no spaces) is:
+        // ("FSKAX" (symbol . "FSKAX") (gnc:time-no-zone . "2020-09-04 12:00:00") (last . #e96.4600) (currency . "USD")))
+        let data = r#"(
+                       ("FSKAX" (symbol . "FSKAX")
+                                (gnc:time-no-zone . "2020-09-04 12:00:00")
+                                (last . #e96.4600)
+                                (currency . "USD")
+                       )
+                      )"#;
+        let quote_from_data = FinanceQuote::parse_quote_l_expr(data).unwrap();
+        assert_eq!(
+            quote_from_data,
+            Quote {
+                symbol: "FSKAX".into(),
+                last: Decimal::new(9646, 2),
+                time: quote_from_data.time,
+                currency: "USD".into()
+            }
+        )
+    }
 
     #[test]
     fn test_parse_quote() {
