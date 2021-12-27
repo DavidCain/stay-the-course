@@ -52,6 +52,27 @@ pub fn bond_allocation(birthday: NaiveDate, from_years: u8) -> Decimal {
 ///  - 10% to REIT
 ///
 /// [core-four]: https://www.bogleheads.org/wiki/Lazy_portfolios#Core_four_portfolios
+///
+/// I add a simple modification, which is to not exceed 50% of my US stocks in large cap.
+/// Some of my largest funds are heavily weighted towards large cap:
+///  - VTSAX (~72% large cap):
+///      - 41%  Giant Cap
+///      - 31%  Large Cap
+///      - 19%  Mid Cap
+///      - 6%   Small Cap
+///      - 2%   Micro Cap
+///  - VFIAX (~84% large cap)
+///      - 50%  Giant Cap
+///      - 34%  Largo Cap
+///      - 16%  Mid Cap
+///  - FZILX (~84% large cap)
+///      - 49%  Giant Cap
+///      - 36%  Largo Cap
+///      - 15%  Mid Cap
+/// For simplicity, just say that any US Total Market fund is 75% large cap.
+/// Accordingly, for a 50/50 split of small+mid vs. large+giant,
+/// I want $1 in VSMAX for every $2 in VTSAX.
+///
 pub fn core_four(ratio_bonds: Decimal) -> Vec<AssetAllocation> {
     let one: Decimal = 1.into();
 
@@ -63,8 +84,9 @@ pub fn core_four(ratio_bonds: Decimal) -> Vec<AssetAllocation> {
     vec![
         // Allocate ratio of bonds
         AssetAllocation::new(AssetClass::USBonds, ratio_bonds),
-        // Split remaining funds between US, International, and REIT (50%, 40%, and 10%)
-        AssetAllocation::new(AssetClass::USStocks, Decimal::new(50, 2) * ratio_stocks),
+        // Split remaining funds between US Total, US Small/Mid, International, and REIT
+        AssetAllocation::new(AssetClass::USTotal, Decimal::new(33, 2) * ratio_stocks),
+        AssetAllocation::new(AssetClass::USSmall, Decimal::new(17, 2) * ratio_stocks),
         AssetAllocation::new(AssetClass::IntlStocks, Decimal::new(40, 2) * ratio_stocks),
         AssetAllocation::new(AssetClass::REIT, Decimal::new(10, 2) * ratio_stocks),
     ]
@@ -112,7 +134,8 @@ mod tests {
             core_four(0.into()),
             vec![
                 AssetAllocation::new(AssetClass::USBonds, 0.into()),
-                AssetAllocation::new(AssetClass::USStocks, Decimal::new(50, 2)),
+                AssetAllocation::new(AssetClass::USTotal, Decimal::new(33, 2)),
+                AssetAllocation::new(AssetClass::USSmall, Decimal::new(17, 2)),
                 AssetAllocation::new(AssetClass::IntlStocks, Decimal::new(40, 2)),
                 AssetAllocation::new(AssetClass::REIT, Decimal::new(10, 2)),
             ]
@@ -120,22 +143,27 @@ mod tests {
     }
 
     #[test]
-    fn test_core_four() {
+    fn test_core_four_young() {
         assert_eq!(
             core_four(Decimal::new(20, 2)),
             vec![
                 AssetAllocation::new(AssetClass::USBonds, Decimal::new(20, 2)),
-                AssetAllocation::new(AssetClass::USStocks, Decimal::new(40, 2)),
+                AssetAllocation::new(AssetClass::USTotal, Decimal::new(264, 3)),
+                AssetAllocation::new(AssetClass::USSmall, Decimal::new(136, 3)),
                 AssetAllocation::new(AssetClass::IntlStocks, Decimal::new(32, 2)),
                 AssetAllocation::new(AssetClass::REIT, Decimal::new(8, 2)),
             ]
         );
+    }
 
+    #[test]
+    fn test_core_four_middle_aged() {
         assert_eq!(
             core_four(Decimal::new(60, 2)),
             vec![
                 AssetAllocation::new(AssetClass::USBonds, Decimal::new(60, 2)),
-                AssetAllocation::new(AssetClass::USStocks, Decimal::new(20, 2)),
+                AssetAllocation::new(AssetClass::USTotal, Decimal::new(132, 3)),
+                AssetAllocation::new(AssetClass::USSmall, Decimal::new(68, 3)),
                 AssetAllocation::new(AssetClass::IntlStocks, Decimal::new(16, 2)),
                 AssetAllocation::new(AssetClass::REIT, Decimal::new(4, 2)),
             ]

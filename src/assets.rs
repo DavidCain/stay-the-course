@@ -112,7 +112,8 @@ impl fmt::Display for Asset {
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum AssetClass {
     USBonds,
-    USStocks,
+    USTotal,
+    USSmall,
     IntlBonds,
     IntlStocks,
     REIT,
@@ -124,7 +125,8 @@ impl fmt::Display for AssetClass {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let name = match self {
             AssetClass::USBonds => "US bonds",
-            AssetClass::USStocks => "US stocks",
+            AssetClass::USTotal => "US total market",
+            AssetClass::USSmall => "US small + mid cap",
             AssetClass::IntlBonds => "International bonds",
             AssetClass::IntlStocks => "International stocks",
             AssetClass::REIT => "REIT",
@@ -199,16 +201,16 @@ mod tests {
 
     #[test]
     fn test_serializing_from_csv() {
-        let data = "ticker_name,asset_class\nVTSAX,USStocks\nVFIAX,USStocks";
+        let data = "ticker_name,asset_class\nVTSAX,USTotal\nVFIAX,USTotal";
         let rdr = csv::Reader::from_reader(data.as_bytes());
         let ac = AssetClassifications::from_reader(rdr).unwrap();
         assert_eq!(
             ac.classify("VTSAX").unwrap().to_owned(),
-            AssetClass::USStocks
+            AssetClass::USTotal
         );
         assert_eq!(
             ac.classify("VFIAX").unwrap().to_owned(),
-            AssetClass::USStocks
+            AssetClass::USTotal
         );
         assert_eq!(
             ac.classify("ABCDE"),
@@ -224,7 +226,7 @@ mod tests {
         let data = "\
 ticker_name,asset_class
 AAAAA,USBonds
-BBBBB,USStocks
+BBBBB,USTotal
 CCCCC,IntlBonds
 DDDDD,IntlStocks
 EEEEE,REIT
@@ -245,7 +247,7 @@ GGGGG,Cash";
             String::from("Private Company"),
             None,
             5196.into(),
-            AssetClass::USStocks,
+            AssetClass::USTotal,
             Some(Decimal::from(400)),
             Some(Decimal::new(1299, 2)),
             None,
