@@ -1,6 +1,6 @@
 language: rust
 rust:
-  - 1.41.0
+  - 1.51.0  # 1.51.0 introduces stable generics
   - stable
   - beta
   - nightly
