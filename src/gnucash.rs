@@ -900,12 +900,13 @@ impl Book {
                         Some(price) => {
                             let days = (now - price.time).num_days().abs();
                             // println!("Days without quote for {:}: {:}", cap.commodity.id, days);
-                            // If it's been more than a day, fetch!
-                            // (If it's currently the weekend, last Friday's fetch will do)
                             match now.weekday() {
+                                // (If it's currently the weekend, last Friday's fetch will do)
                                 chrono::Weekday::Sat => days > 1,
                                 chrono::Weekday::Sun => days > 2,
-                                _ => days > 0,
+                                // On weekdays, settle for yesterday's quotes.
+                                // (AlphaVantage's free API isn't always the most current)
+                                _ => days > 1,
                             }
                         }
                         // If no price was found, we definitely need a new quote.
