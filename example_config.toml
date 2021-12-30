@@ -2,6 +2,6 @@
 birthday = '1972-07-12'
 
 [gnucash]
-path_to_book = 'example/sqlite3.gnucash'
+path_to_book = '/home/linus/sqlite3.gnucash'
 file_format = 'sqlite3'
 update_prices = true  # Only supported for SQLite

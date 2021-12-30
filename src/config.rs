@@ -35,9 +35,11 @@ impl Config {
                 birthday: String::from("1985-01-01"),
             },
             gnucash: GnuCash {
-                path_to_book: String::from("example.sqlite3"),
+                path_to_book: String::from("example/sqlite3.gnucash"),
                 file_format: String::from("sqlite3"),
-                update_prices: true,
+                // This requires GnuCash to be installed.
+                // So that people can demo with *just* Rust, assume it's off by default.
+                update_prices: false,
             },
         }
     }
@@ -87,7 +89,7 @@ mod tests {
     fn test_parse_from_toml() {
         let conf = Config::from_file("example_config.toml");
         assert_eq!(conf.user_birthday(), NaiveDate::from_ymd(1972, 7, 12));
-        assert_eq!(&conf.gnucash.path_to_book, "example/sqlite3.gnucash");
+        assert_eq!(&conf.gnucash.path_to_book, "/home/linus/sqlite3.gnucash");
         assert_eq!(&conf.gnucash.file_format, "sqlite3");
         assert_eq!(conf.gnucash.update_prices, true);
     }
@@ -96,8 +98,8 @@ mod tests {
     fn test_fallback_to_default_settings() {
         let conf = Config::from_file("/tmp/definitely_does_not_exist.toml");
         assert_eq!(&conf.user.birthday, "1985-01-01");
-        assert_eq!(&conf.gnucash.path_to_book, "example.sqlite3");
+        assert_eq!(&conf.gnucash.path_to_book, "example/sqlite3.gnucash");
         assert_eq!(&conf.gnucash.file_format, "sqlite3");
-        assert_eq!(conf.gnucash.update_prices, true);
+        assert_eq!(conf.gnucash.update_prices, false);
     }
 }
