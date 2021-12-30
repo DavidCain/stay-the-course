@@ -1,4 +1,4 @@
-[![Build Status](https://api.travis-ci.com/DavidCain/stay-the-course.svg?branch=master)](https://travis-ci.com/DavidCain/stay-the-course/)
+[![Build Status](https://github.com/DavidCain/stay-the-course/actions/workflows/ci.yml/badge.svg)](https://github.com/DavidCain/stay-the-course/actions)
 
 
 _This tool is a work in progress, and a first project to learn Rust._
