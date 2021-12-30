@@ -115,6 +115,28 @@ impl Portfolio {
             .sum()
     }
 
+    /// Identify the minimum amount to bring the portfolio into perfect balance.
+    pub fn minimum_addition_to_balance(&self) -> Decimal {
+        let total = self.current_value();
+        if total == 0.into() {
+            return 0.into();
+        }
+
+        // First, find the most overallocated fund.
+        let most_overallocated = self
+            .allocations
+            .iter()
+            .max_by(|a, b| a.deviation(total).cmp(&b.deviation(total)))
+            .expect("Can't find most overallocated asset; no allocations found!");
+
+        // We will contribute to other funds *first* until this fund reaches its target ratio.
+        // Once that minimum amount is contributed, we'll be in balance.
+        let min_new_portfolio_value =
+            most_overallocated.current_value() / most_overallocated.target_ratio;
+
+        min_new_portfolio_value - total
+    }
+
     fn future_value(&self) -> Decimal {
         self.allocations
             .iter()
@@ -390,6 +412,109 @@ mod tests {
         bonds.add_contribution(Decimal::new(1467, 2));
         assert_eq!(bonds.current_value(), 0.into());
         assert_eq!(bonds.future_value(), Decimal::new(5187, 2));
+    }
+
+    #[test]
+    fn test_minimum_to_balance_two_fund_portfolio() {
+        let mut stocks = AssetAllocation::new(AssetClass::USTotal, Decimal::new(50, 2));
+        let bonds = AssetAllocation::new(AssetClass::USBonds, Decimal::new(50, 2));
+        stocks.add_asset(Asset::new(
+            String::from("Vanguard Total Stock Market Index Fund Admiral Shares"),
+            Some(String::from("VTSAX")),
+            8675.into(),
+            AssetClass::USTotal,
+            None,
+            None,
+            None,
+        ));
+
+        let allocations = vec![stocks, bonds];
+        let portfolio = Portfolio::new(allocations);
+
+        // With $8,675 in stocks and 0 in bonds, you need $8,675 in bonds to get 50/50
+        assert_eq!(portfolio.minimum_addition_to_balance(), 8675.into());
+    }
+
+    #[test]
+    fn test_minimum_to_balance_three_fund_portfolio() {
+        let mut us_stocks = AssetAllocation::new(AssetClass::USTotal, Decimal::new(60, 2));
+        let mut intl_stocks = AssetAllocation::new(AssetClass::IntlStocks, Decimal::new(30, 2));
+        let mut bonds = AssetAllocation::new(AssetClass::USBonds, Decimal::new(10, 2));
+
+        // Portfolio is $1000 total.
+        // Bonds *and* stocks are over-allocated, but in an interesting way:
+        // - Stocks are overallocated *absolutely* ($60 over target, vs $40 over for bonds)
+        // - Bonds are overallocated from a target ratio standpoint.
+        //
+        // The ideal result is for bonds to be at 10% the total, still at $140.
+        // To do that, we need to add $400: $180 into US stocks, $220 international
+        us_stocks.add_asset(Asset::new(
+            String::from("Vanguard Total Stock Market Index Fund Admiral Shares"),
+            Some(String::from("VTSAX")),
+            660.into(),
+            AssetClass::USTotal,
+            None,
+            None,
+            None,
+        ));
+        intl_stocks.add_asset(Asset::new(
+            String::from("Vanguard Total International Stock Index Fund Admiral Shares"),
+            Some(String::from("VTIAX")),
+            200.into(),
+            AssetClass::IntlStocks,
+            None,
+            None,
+            None,
+        ));
+        bonds.add_asset(Asset::new(
+            String::from("Vanguard Total Bond Market Index Fund Admiral Shares"),
+            Some(String::from("VBTLX")),
+            140.into(),
+            AssetClass::USBonds,
+            None,
+            None,
+            None,
+        ));
+
+        let allocations = vec![us_stocks, intl_stocks, bonds];
+        let portfolio = Portfolio::new(allocations);
+
+        assert_eq!(portfolio.minimum_addition_to_balance(), 400.into());
+
+        // The recommendations for allocating money match what we'd expect:
+        // - $220 into Intl stocks, total $220
+        // - $180 into US stocks, total $840
+        // - $0 to bonds, remaining at $140
+        let balanced_portfolio = optimally_allocate(portfolio, 400.into());
+        assert_eq!(balanced_portfolio.future_value(), 1400.into());
+        let future_values: Vec<Decimal> = balanced_portfolio
+            .allocations
+            .iter()
+            .map(|allocation| allocation.future_value().round_dp(2))
+            .collect();
+        let tickers: Vec<&AssetClass> = balanced_portfolio
+            .allocations
+            .iter()
+            .map(|allocation| &allocation.asset_class)
+            .collect();
+
+        assert_eq!(
+            tickers,
+            vec![
+                &AssetClass::IntlStocks,
+                &AssetClass::USTotal,
+                &AssetClass::USBonds,
+            ]
+        );
+        assert_eq!(future_values, vec![420.into(), 840.into(), 140.into()]);
+    }
+
+    #[test]
+    fn test_minimum_to_balance_single_fund_portfolio() {
+        let terrible_allocation = AssetAllocation::new(AssetClass::Cash, 1.into());
+        let portfolio = Portfolio::new(vec![terrible_allocation]);
+        // Obviously, you never need to add money to get a 100% allocation
+        assert_eq!(portfolio.minimum_addition_to_balance(), 0.into());
     }
 
     #[test]

@@ -98,6 +98,10 @@ fn main() {
         );
     }
 
+    println!(
+        "Minimum to bring all assets to target: ${:.0}",
+        portfolio.minimum_addition_to_balance()
+    );
     let contribution = get_contribution();
 
     // From those ideal allocations, identify the best way to invest a lump sum
