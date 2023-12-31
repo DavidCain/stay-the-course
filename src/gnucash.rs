@@ -65,7 +65,7 @@ impl Price {
      * still write it to the database anyway - GnuCash can pick which it prefers.
      */
     fn should_update_with_quote(&self, q: &quote::Quote) -> bool {
-        self.time.date() < q.time.date() || (self.value != q.last)
+        self.time.date_naive() < q.time.date_naive() || (self.value != q.last)
     }
 }
 
@@ -917,9 +917,9 @@ impl Book {
 
         // Commodities with the oldest date will come first
         commodities_and_prices.sort_by_key(|cap| match cap.price {
-            Some(price) => price.time.date(),
+            Some(price) => price.time.date_naive(),
             // Because we can't currently handle them, put commodities missing prices last
-            None => now.date(),
+            None => now.date_naive(),
         });
         commodities_and_prices
             .into_iter()
@@ -949,7 +949,7 @@ impl Book {
                 println!(
                     " --> {:} ({:})",
                     quote.last,
-                    quote.time.date().format("%Y-%m-%d")
+                    quote.time.date_naive().format("%Y-%m-%d")
                 );
                 quote
             }

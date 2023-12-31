@@ -52,7 +52,7 @@ fn summarize_retirement_prospects(birthday: NaiveDate, portfolio_total: Decimal,
         );
     }
 
-    let today = Local::now().date().naive_local();
+    let today = Local::now().date_naive();
     summarize(today, birthday, portfolio_total);
 
     let approx_age = today.year() - birthday.year(); // Could be this age, or one year younger
@@ -61,7 +61,10 @@ fn summarize_retirement_prospects(birthday: NaiveDate, portfolio_total: Decimal,
     let retirement_ages = (start_age)..=(start_age + 15);
     for age in retirement_ages.step_by(5) {
         let year = birthday.year() + age;
-        let day_of_retirement = NaiveDate::from_ymd(year, birthday.month(), birthday.day());
+        // Subtle bug here -- Feb 29th doesn't exist in some years.
+        // Ignore it for now.
+        let day_of_retirement =
+            NaiveDate::from_ymd_opt(year, birthday.month(), birthday.day()).unwrap();
         let future_total = compounding::compound(portfolio_total, real_apy, day_of_retirement);
         summarize(day_of_retirement, birthday, future_total);
     }

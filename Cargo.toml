@@ -5,7 +5,7 @@ authors = ["David Cain <davidjosephcain@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-chrono = { version = "^0.4", features = ["serde"] }
+chrono = { version = "^0.4.31", features = ["serde"] }
 csv = "^1"
 lexpr = "^0.2.4"
 num = "^0.4.0"

@@ -3,7 +3,7 @@ use num::ToPrimitive;
 use rust_decimal::Decimal;
 
 fn years_until(future_date: NaiveDate) -> f64 {
-    let today: NaiveDate = Local::now().date().naive_local();
+    let today: NaiveDate = Local::now().date_naive();
     banking_years(today, future_date)
 }
 

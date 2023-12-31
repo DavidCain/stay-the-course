@@ -4,7 +4,7 @@ use chrono::{Local, NaiveDate};
 use rust_decimal::Decimal;
 
 fn age_in_weeks(birthday: NaiveDate) -> i64 {
-    let today: NaiveDate = Local::now().date().naive_local();
+    let today: NaiveDate = Local::now().date_naive();
     assert!(birthday < today, "You were born in the future?");
     (today - birthday).num_weeks()
 }
