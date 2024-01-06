@@ -82,6 +82,15 @@ With that information supplied, the tool will:
    contribution amount has been fully allocated to all funds)
 5. Output the optimal contributions
 
+## Fetching quotes from 3rd party APIs
+I'm using the AlphaVantage free API. To use it, make sure that:
+
+1. `ALPHAVANTAGE_API_KEY` is an available env var. ([Get an API key][av-api-key] first)
+2. `update_prices = true` is set in `[gnucash]` within `config.toml`
+
+When configured, this ensures that the latest stock prices per fund
+are incorporated into the allocation recommendations.
+
 
 # Background - target asset allocation
 [Asset allocation][asset_allocation] is the process of reconciling one's risk
@@ -187,6 +196,7 @@ This project is very much a work in progress. Some key outstanding tasks:
 [lazy_portfolio]: https://www.bogleheads.org/wiki/Lazy_portfolios#Three_fund_lazy_portfolios
 [tax_loss_harvesting]: https://www.bogleheads.org/wiki/Tax_loss_harvesting
 [tax_efficient_placement]: https://www.bogleheads.org/wiki/Tax-efficient_fund_placement
+[av-api-key]: https://www.alphavantage.co/support/#api-key
 
 
 [img-gnucash-interface]: https://github.com/DavidCain/stay-the-course/blob/master/images/gnucash_interface.png
