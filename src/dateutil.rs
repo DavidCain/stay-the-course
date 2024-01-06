@@ -1,13 +1,16 @@
-use chrono::{DateTime, Local, NaiveDateTime, ParseResult, TimeZone, Utc};
+use chrono::{DateTime, Local, LocalResult, NaiveDateTime, ParseResult, TimeZone, Utc};
 
 static GNUCASH_DT_FORMAT: &str = "%Y-%m-%d %H:%M:%S %z";
 static GNUCASH_NO_DT_FORMAT: &str = "%Y-%m-%d %H:%M:%S";
 
 /**
- * Attach the local timezone to a naive datestring that doesn't state its timezone.
+ * Attach noon, local time to a naive YMD date.
  */
-pub fn localize_naive_dt(datestring: &str) -> ParseResult<DateTime<Local>> {
-    Local.datetime_from_str(datestring, GNUCASH_NO_DT_FORMAT)
+pub fn localize_at_noon(ymd: &str) -> LocalResult<DateTime<Local>> {
+    let noon: String = format!("{:}T12:00:00", ymd);
+    let naive = NaiveDateTime::parse_from_str(&noon, "%Y-%m-%dT%H:%M:%S").unwrap();
+
+    Local.from_local_datetime(&naive)
 }
 
 // In XML, datetimes are given with local TZ explicitly in them!
