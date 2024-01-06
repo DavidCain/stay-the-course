@@ -99,19 +99,19 @@ mod tests {
     #[test]
     #[should_panic(expected = "You were born in the future?")]
     fn test_future_birthday() {
-        let birthday = NaiveDate::from_ymd(2095, 6, 14);
+        let birthday = NaiveDate::from_ymd_opt(2095, 6, 14).unwrap();
         age_in_weeks(birthday);
     }
 
     #[test]
     fn test_bond_allocation_ancient_investor() {
-        let birthday = NaiveDate::from_ymd(1863, 11, 19);
+        let birthday = NaiveDate::from_ymd_opt(1863, 11, 19).unwrap();
         assert_eq!(bond_allocation(birthday, 100), Decimal::from(1));
     }
 
     #[test]
     fn test_bond_allocation_very_young_investor() {
-        let birthday = NaiveDate::from_ymd(2018, 12, 30);
+        let birthday = NaiveDate::from_ymd_opt(2018, 12, 30).unwrap();
         assert_eq!(bond_allocation(birthday, 130), Decimal::from(0));
     }
 

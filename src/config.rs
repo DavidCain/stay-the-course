@@ -82,13 +82,19 @@ mod tests {
         let user = User {
             birthday: String::from("1962-12-31"),
         };
-        assert_eq!(user.birthday(), NaiveDate::from_ymd(1962, 12, 31));
+        assert_eq!(
+            user.birthday(),
+            NaiveDate::from_ymd_opt(1962, 12, 31).unwrap()
+        );
     }
 
     #[test]
     fn test_parse_from_toml() {
         let conf = Config::from_file("example_config.toml");
-        assert_eq!(conf.user_birthday(), NaiveDate::from_ymd(1972, 7, 12));
+        assert_eq!(
+            conf.user_birthday(),
+            NaiveDate::from_ymd_opt(1972, 7, 12).unwrap()
+        );
         assert_eq!(&conf.gnucash.path_to_book, "/home/linus/sqlite3.gnucash");
         assert_eq!(&conf.gnucash.file_format, "sqlite3");
         assert_eq!(conf.gnucash.update_prices, true);

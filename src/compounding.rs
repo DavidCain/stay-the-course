@@ -40,14 +40,14 @@ mod tests {
 
     #[test]
     fn test_banking_years() {
-        let current_date = NaiveDate::from_ymd(2019, 4, 18);
-        let future_date = NaiveDate::from_ymd(2095, 4, 18);
+        let current_date = NaiveDate::from_ymd_opt(2019, 4, 18).unwrap();
+        let future_date = NaiveDate::from_ymd_opt(2095, 4, 18).unwrap();
         assert_eq!(banking_years(current_date, future_date), 76.0);
     }
 
     #[test]
     fn test_compounding() {
-        let future_date = NaiveDate::from_ymd(2055, 4, 18);
+        let future_date = NaiveDate::from_ymd_opt(2055, 4, 18).unwrap();
         let total = compound(Decimal::from(100_000), 0.07, future_date);
         assert!(total > Decimal::from(100_000));
         // TODO: This value is hard-coded from today's date (July 9, 2019)

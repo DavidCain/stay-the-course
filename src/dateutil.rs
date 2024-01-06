@@ -19,7 +19,7 @@ pub fn localize_from_dt_with_tz(datestring: &str) -> ParseResult<DateTime<Local>
 // In SQLite, all datetimes are UTC, but without timezone explicitly stated!
 pub fn utc_to_datetime(datestring: &str) -> DateTime<Local> {
     let dt = NaiveDateTime::parse_from_str(datestring, GNUCASH_NO_DT_FORMAT).unwrap();
-    let utc = DateTime::<Utc>::from_utc(dt, Utc);
+    let utc = DateTime::<Utc>::from_naive_utc_and_offset(dt, Utc);
     utc.with_timezone(&Local)
 }
 
