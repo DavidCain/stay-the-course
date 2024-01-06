@@ -1,8 +1,5 @@
 [![Build Status](https://github.com/DavidCain/stay-the-course/actions/workflows/ci.yml/badge.svg)](https://github.com/DavidCain/stay-the-course/actions)
 
-
-_This tool is a work in progress, and a first project to learn Rust._
-
 **Warning:** The author is neither a tax professional nor a retirement advisor.
 Any statements contained within this document do not constitute legal, tax, or
 investment advice.
@@ -166,8 +163,10 @@ This project is very much a work in progress. Some key outstanding tasks:
 - [ ] Return Result instead of just panicking on error conditions
 
 ## External resources
-- [Optimal rebalancing][optimal_rebalancing]: The excellent web tool by Albert
-  H. Mao. Provides a textual interface to lazily rebalance.
+- [Optimal rebalancing (archive)][optimal_rebalancing]: Though it has since
+  been taken down (it lived at `http://optimalrebalancing.tk`, now spam), this
+  was an excellent web tool by Albert H. Mao. It provided a textual interface
+  to lazily rebalance.
 - [`rebalance-app`][rebalance-app] by Alberto Leal: another Rust implementation
   based off [Optimal rebalancing][optimal_rebalancing], but without GnuCash
   integration and relying on a different underlying type libraries. Probably better
@@ -177,7 +176,7 @@ This project is very much a work in progress. Some key outstanding tasks:
 
 
 [gnucash]: https://www.gnucash.org/
-[optimal_rebalancing]: http://optimalrebalancing.tk
+[optimal_rebalancing]: https://archive.ph/IUimB
 [rebalance-app]: https://github.com/dashed/rebalance-app
 
 [TIPS]: https://en.wikipedia.org/wiki/United_States_Treasury_security#TIPS
