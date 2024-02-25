@@ -942,8 +942,6 @@ impl Book {
         }
         std::io::stdout().flush().ok();
 
-        // Alphavantage will error out if exceeding 5 calls in a minute!
-        // (On latest versions, requests just stall instead of raising exceptions)
         let last_quote = match quote::FinanceQuote::fetch_quote(commodity) {
             Ok(quote) => {
                 println!(
@@ -986,13 +984,7 @@ impl Book {
         conn: &Connection,
     ) -> Result<Vec<Price>, quote::FinanceQuoteError> {
         let mut new_prices = Vec::new();
-        for (i, commodity) in self.commodities_needing_quotes(conn).iter().enumerate() {
-            // AlphaVantage will cut you off at 5 requests per minute.
-            // Requests used to error out, but they now just hang until a minute passes.
-            // (I'd rather just exit early and fetch more quotes on the next run)
-            if i == 5 {
-                break;
-            }
+        for commodity in self.commodities_needing_quotes(conn).iter() {
             if let Some(price) = self.update_price_if_needed(conn, &commodity)? {
                 new_prices.push(price);
             }
