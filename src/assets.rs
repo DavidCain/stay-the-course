@@ -176,6 +176,10 @@ impl AssetClassifications {
     }
 
     pub fn classify(&self, fund_name: &str) -> Result<&AssetClass, UnclassifiedAssetError> {
+        // Special case -- no need to classify *every* fund as a bond...
+        if fund_name.starts_with("Series I ") {
+            return Ok(&AssetClass::USBonds);
+        }
         self.mapping
             .get(fund_name)
             .ok_or_else(|| UnclassifiedAssetError::new(fund_name))

@@ -243,7 +243,7 @@ impl PriceDatabase {
                         FROM prices p
                              JOIN commodities from_c ON p.commodity_guid = from_c.guid
                              JOIN commodities to_c   ON p.currency_guid = to_c.guid
-                       WHERE from_c.namespace = 'FUND'
+                       WHERE from_c.namespace IN ('FUND', 'Series I')
                        GROUP BY p.commodity_guid;",
         )?;
 
@@ -638,11 +638,11 @@ impl Account {
     fn read_splits_from_sqlite(&mut self, conn: &Connection) -> rusqlite::Result<()> {
         let mut stmt = conn.prepare(
             "SELECT account_guid,
-                        value_num, value_denom,
-                        quantity_num, quantity_denom
-                   FROM splits
-                  WHERE account_guid = $1
-                  ",
+                    value_num, value_denom,
+                    quantity_num, quantity_denom
+               FROM splits
+              WHERE account_guid = $1
+              ",
         )?;
 
         let splits = stmt.query_map([&self.guid].iter(), |row| {
@@ -992,7 +992,7 @@ impl Book {
         Ok(new_prices)
     }
 
-    fn get_investment_accounts(conn: &Connection) -> Vec<Account> {
+    fn get_accounts(conn: &Connection, namespace: &str) -> Vec<Account> {
         let mut stmt = conn
             .prepare(
                 "SELECT a.guid, a.name,
@@ -1000,12 +1000,12 @@ impl Book {
                         c.guid, c.mnemonic, c.namespace, c.fullname
                    FROM accounts a
                         JOIN commodities c ON a.commodity_guid = c.guid
-                  WHERE c.namespace = 'FUND'
+                  WHERE c.namespace = $1
                   ",
             )
             .expect("Invalid SQL");
 
-        stmt.query_map(NO_PARAMS, |row| {
+        stmt.query_map([namespace], |row| {
             let account_guid = row.get(0)?;
             let account_name = row.get(1)?;
             let commodity =
@@ -1023,8 +1023,20 @@ impl GnucashFromSqlite for Book {
     fn from_sqlite(conn: &Connection, conf: &Config) -> Book {
         let mut book = Book::new();
 
-        for mut account in Book::get_investment_accounts(conn) {
+        for mut account in Book::get_accounts(conn, "FUND") {
             assert!(account.is_investment());
+            account.read_splits_from_sqlite(conn).unwrap();
+            book.add_investment(account);
+        }
+
+        // I Bonds are an interesting case -- they should count as bounds in any
+        // portfolio, but they also aren't publicly-traded funds (nor is it easy
+        // to fetch the current value of an I Bond).
+        //
+        // To get around all this, I make up ticker names for my I Bonds, then
+        // just use the Price Editor to input the values from TreasuryDirect.gov
+        // (every ~year or so, since interest rates are adjusted twice yearly).
+        for mut account in Book::get_accounts(conn, "Series I") {
             account.read_splits_from_sqlite(conn).unwrap();
             book.add_investment(account);
         }
