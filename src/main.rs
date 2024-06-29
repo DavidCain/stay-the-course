@@ -45,10 +45,10 @@ fn summarize_retirement_prospects(birthday: NaiveDate, portfolio_total: Decimal,
         // TODO: Correctly calculate age instead of this cheap approximation
         let retirement_age = day_of_retirement.year() - birthday.year();
         println!(
-            " - {}: ${:.0}  SWR: ${:.0}",
+            " - {}: {:}  SWR: {:}",
             retirement_age,
-            future_total,
-            compounding::safe_withdrawal_income(future_total)
+            decutil::format_dollars(&future_total),
+            decutil::format_dollars(&compounding::safe_withdrawal_income(future_total))
         );
     }
 
@@ -93,17 +93,17 @@ fn main() {
         let sql_stats = stats::Stats::new(&conf.gnucash.path_to_book);
         let after_tax = sql_stats.after_tax_income().unwrap();
         let charity = sql_stats.charitable_giving().unwrap();
-        println!("After-tax income: ${:.0}", after_tax);
+        println!("After-tax income: {:}", decutil::format_dollars(&after_tax));
         println!(
-            "Charitable giving: ${:.0} ({:.0}% of after-tax income)",
-            charity,
+            "Charitable giving: {:} ({:.0}% of after-tax income)",
+            decutil::format_dollars(&charity),
             (charity / after_tax) * Decimal::from(100)
         );
     }
 
     println!(
-        "Minimum to bring all assets to target: ${:.0}",
-        portfolio.minimum_addition_to_balance()
+        "Minimum to bring all assets to target: {:}",
+        decutil::format_dollars(&portfolio.minimum_addition_to_balance())
     );
     let contribution = get_contribution();
 

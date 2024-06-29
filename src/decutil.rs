@@ -14,6 +14,29 @@ pub struct IncompleteRatioError {
     fraction: String,
 }
 
+/**
+ * Format the quantity as USD in US locale.
+ *
+ * Yes, there are better ways to handle locales, but I don't care.
+ */
+pub fn format_dollars(quantity: &Decimal) -> String {
+    let formatted = match quantity.round().to_u64() {
+        // If I wanted, could use the `thousands` crate.
+        // Some(dollars) => dollars.separate_with_commas()
+        Some(dollars) => dollars
+            .to_string()
+            .as_bytes()
+            .rchunks(3)
+            .rev()
+            .map(std::str::from_utf8)
+            .collect::<Result<Vec<&str>, _>>()
+            .unwrap()
+            .join(","),
+        None => format!("{:.0}", quantity),
+    };
+    format!("${:}", formatted)
+}
+
 impl IncompleteRatioError {
     fn new(fraction: &str) -> IncompleteRatioError {
         IncompleteRatioError {
@@ -61,6 +84,31 @@ pub fn price_to_cents(quantity: &Decimal) -> Option<u64> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_less_than_one_thousand() {
+        assert_eq!(format_dollars(&Decimal::from(150)), "$150");
+    }
+
+    #[test]
+    fn test_thousands() {
+        assert_eq!(format_dollars(&Decimal::from(25123)), "$25,123");
+    }
+
+    #[test]
+    fn test_millions() {
+        assert_eq!(format_dollars(&Decimal::from(9_123_955)), "$9,123,955");
+    }
+
+    #[test]
+    fn test_rounds_up() {
+        assert_eq!(format_dollars(&Decimal::new(123_95593, 2)), "$123,956");
+    }
+
+    #[test]
+    fn test_rounds_down() {
+        assert_eq!(format_dollars(&Decimal::new(123_95547, 2)), "$123,955");
+    }
 
     #[test]
     fn test_incomplete_ratios() {

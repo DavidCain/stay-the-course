@@ -1,4 +1,5 @@
 use crate::assets::{Asset, AssetClass};
+use crate::decutil;
 use rust_decimal::Decimal;
 use std::cmp;
 use std::fmt;
@@ -75,9 +76,9 @@ impl fmt::Display for AssetAllocation {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "{:}: ${:.0} (🎯 {:.2}%)",
+            "{:}: {:} (🎯 {:.2}%)",
             self.asset_class,
-            self.current_value(),
+            decutil::format_dollars(&self.current_value()),
             self.target_ratio * Decimal::from(100)
         )?;
 
@@ -98,7 +99,11 @@ impl fmt::Display for Portfolio {
         for allocation in (&self.allocations).iter() {
             writeln!(f, "{:}", allocation)?;
         }
-        write!(f, "Portfolio total: ${:.0}", self.current_value())
+        write!(
+            f,
+            "Portfolio total: {:}",
+            decutil::format_dollars(&self.current_value())
+        )
     }
 }
 

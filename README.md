@@ -22,16 +22,16 @@ Just clone and `cargo run` to see a demonstration with a real GnuCash database:
 $ git clone git@github.com:DavidCain/stay-the-course.git
 $ cd stay-the-course
 $ cargo run
-US stocks: $10032 (🎯 42.68%)
+US stocks: $10,032 (🎯 42.68%)
   - FZROX: $5120.56 (485.3619 x $10.55)
   - VTSAX: $4911.94 (66.5305 x $73.83)
-International stocks: $7749 (🎯 34.14%)
+International stocks: $7,749 (🎯 34.14%)
   - VTIAX: $7749.70 (273.7445 x $28.31)
-US bonds: $3393 (🎯 14.63%)
+US bonds: $3,393 (🎯 14.63%)
   - VBTLX: $3393.63 (311.0576 x $10.91)
-REIT: $3330 (🎯 8.53%)
+REIT: $3,330 (🎯 8.53%)
   - VGSLX: $3330.72 (26.1438 x $127.40)
-Portfolio total: $24506
+Portfolio total: $24,506
 
 Worth at retirement (Assuming 7% growth):
  - 34: $24506  SWR: $980
@@ -40,8 +40,8 @@ Worth at retirement (Assuming 7% growth):
  - 60: $137434  SWR: $5497
  - 65: $192750  SWR: $7710
 
-After-tax income: $49700
-Charitable giving: $5000 (10% of after-tax income)
+After-tax income: $49,700
+Charitable giving: $5,000 (10% of after-tax income)
 How much to contribute or withdraw?
 2000
 Contribute the following amounts:
