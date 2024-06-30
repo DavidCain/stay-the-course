@@ -74,7 +74,7 @@ fn summarize_retirement_prospects(birthday: NaiveDate, portfolio_total: Decimal,
 fn main() {
     let conf = Config::from_file("config.toml");
     let book = Book::from_config(&conf);
-    println!("--------------------------------------------------------");
+    println!("-----------------------------------------------------------------------");
 
     // Identify our ideal allocations (percentages by asset class, summing to 100%)
     let birthday = conf.user_birthday();

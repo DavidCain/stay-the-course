@@ -22,37 +22,44 @@ Just clone and `cargo run` to see a demonstration with a real GnuCash database:
 $ git clone git@github.com:DavidCain/stay-the-course.git
 $ cd stay-the-course
 $ cargo run
-US stocks: $10,032 (🎯 42.68%)
-  - FZROX: $5120.56 (485.3619 x $10.55)
-  - VTSAX: $4911.94 (66.5305 x $73.83)
-International stocks: $7,749 (🎯 34.14%)
-  - VTIAX: $7749.70 (273.7445 x $28.31)
-US bonds: $3,393 (🎯 14.63%)
-  - VBTLX: $3393.63 (311.0576 x $10.91)
-REIT: $3,330 (🎯 8.53%)
-  - VGSLX: $3330.72 (26.1438 x $127.40)
-Portfolio total: $24,506
+Using default example configuration. Write to config.toml for real use.
+-----------------------------------------------------------------------
+International stocks: $8,861 (🎯 32.15%)
+  - VTIAX (VTIAX): $8861.10 (273.7445 x $32.37)
+US bonds: $6,851 (🎯 19.62%)
+  - VBTLX (VBTLX): $6850.79 (1151.3937 x $5.95)
+US total market: $5,894 (🎯 26.52%)
+  - FZROX (FZROX): $5202.48 (274.3919 x $18.96)
+  - VTSAX (VTSAX): $691.13 (5.2905 x $130.63)
+US small + mid cap: $4,000 (🎯 13.66%)
+  - VSMAX (VSMAX): $4000.00 (38.2409 x $104.60)
+REIT: $3,080 (🎯 8.03%)
+  - VGSLX (VGSLX): $3080.26 (26.1438 x $117.82)
+Portfolio total: $28,686
 
 Worth at retirement (Assuming 7% growth):
- - 34: $24506  SWR: $980
- - 50: $69858  SWR: $2794
- - 55: $97975  SWR: $3919
- - 60: $137434  SWR: $5497
- - 65: $192750  SWR: $7710
+ - 39: $28,686  SWR: $1,147
+ - 50: $58,391  SWR: $2,336
+ - 55: $81,893  SWR: $3,276
+ - 60: $114,875  SWR: $4,595
+ - 65: $161,111  SWR: $6,444
 
 After-tax income: $49,700
 Charitable giving: $5,000 (10% of after-tax income)
+Minimum to bring all assets to target: $9,635
 How much to contribute or withdraw?
-2000
+3000
 Contribute the following amounts:
- - International stocks: $903.07
-   31.62% -> 32.64% (🎯 34.14%) Δ [7.3% -> 4.4%]
- - US bonds: $313.46
-   13.84% -> 13.98% (🎯 14.63%) Δ [5.3% -> 4.4%]
- - US stocks: $783.46
-   40.93% -> 40.80% (🎯 42.68%) Δ [4.0% -> 4.4%]
+ - US total market: $2083.11
+   20.54% -> 25.17% (🎯 26.52%) Δ [22.5% -> 5.0%]
+ - International stocks: $807.65
+   30.89% -> 30.51% (🎯 32.15%) Δ [3.9% -> 5.0%]
+ - US small + mid cap: $109.22
+   13.94% -> 12.96% (🎯 13.66%) Δ [-2.0% -> 5.0%]
+ - US bonds: $0.00
+   23.88% -> 21.62% (🎯 19.62%) Δ [-21.7% -> -10.1%]
  - REIT: $0.00
-   13.59% -> 12.56% (🎯 8.53%) Δ [-59.2% -> -47.1%]
+   10.73% -> 9.72% (🎯 8.03%) Δ [-33.5% -> -20.9%]
 ```
 
 ### Sample GnuCash accounting records

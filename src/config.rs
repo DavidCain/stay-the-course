@@ -64,7 +64,7 @@ impl Config {
         let config_toml = match fs::read_to_string(path) {
             Ok(file) => file,
             Err(_) => {
-                // Silently fall back to the default
+                println!("Using default example configuration. Write to config.toml for real use.");
                 return Config::default();
             }
         };
