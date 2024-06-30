@@ -38,11 +38,11 @@ REIT: $3,080 (🎯 8.03%)
 Portfolio total: $28,686
 
 Worth at retirement (Assuming 7% growth):
- - 39: $28,686  SWR: $1,147
- - 50: $58,391  SWR: $2,336
- - 55: $81,893  SWR: $3,276
- - 60: $114,875  SWR: $4,595
- - 65: $161,111  SWR: $6,444
+ - 39:     $28,686  SWR:    $1,147
+ - 50:     $58,391  SWR:    $2,336
+ - 55:     $81,893  SWR:    $3,276
+ - 60:    $114,875  SWR:    $4,595
+ - 65:    $161,111  SWR:    $6,444
 
 After-tax income: $49,700
 Charitable giving: $5,000 (10% of after-tax income)

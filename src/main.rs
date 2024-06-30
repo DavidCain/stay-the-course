@@ -45,7 +45,9 @@ fn summarize_retirement_prospects(birthday: NaiveDate, portfolio_total: Decimal,
         // TODO: Correctly calculate age instead of this cheap approximation
         let retirement_age = day_of_retirement.year() - birthday.year();
         println!(
-            " - {}: {:}  SWR: {:}",
+            // Neatly displays net worth up to $25MM
+            // If your assets are that high, why are you running this jank?
+            " - {}: {: >11}  SWR: {: >9}",
             retirement_age,
             decutil::format_dollars(&future_total),
             decutil::format_dollars(&compounding::safe_withdrawal_income(future_total))
